@@ -1,0 +1,5 @@
+{
+  "AppSyncApiName": "thatplacesucks",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false
+}

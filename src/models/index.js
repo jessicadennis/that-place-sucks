@@ -1,0 +1,13 @@
+// @ts-check
+import { initSchema } from '@aws-amplify/datastore';
+import { schema } from './schema';
+
+
+
+const { Restaurant, Category, RestaurantCategory } = initSchema(schema);
+
+export {
+  Restaurant,
+  Category,
+  RestaurantCategory
+};
