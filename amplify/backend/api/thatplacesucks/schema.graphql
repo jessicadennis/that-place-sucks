@@ -2,13 +2,13 @@ type Restaurant @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
   rating: Int!
-  notes: [String!]
-  Categories: [Category!] @manyToMany(relationName: "RestaurantCategory")
+  notes: [String]
+  categoryID: ID! @index(name: "byCategory")
 }
 
 type Category @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
-  restaurants: [Restaurant] @manyToMany(relationName: "RestaurantCategory")
+  Restaurants: [Restaurant] @hasMany(indexName: "byCategory", fields: ["id"])
 }
  

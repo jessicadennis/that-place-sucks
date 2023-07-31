@@ -1,6 +1,6 @@
 import { ModelInit, MutableModel, __modelMeta__, ManagedIdentifier } from "@aws-amplify/datastore";
 // @ts-ignore
-import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@aws-amplify/datastore";
+import { LazyLoading, LazyLoadingDisabled, AsyncCollection } from "@aws-amplify/datastore";
 
 
 
@@ -14,8 +14,8 @@ type EagerRestaurant = {
   readonly id: string;
   readonly name: string;
   readonly rating: number;
-  readonly notes?: string[] | null;
-  readonly Categories?: RestaurantCategory[] | null;
+  readonly notes?: (string | null)[] | null;
+  readonly categoryID: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -28,8 +28,8 @@ type LazyRestaurant = {
   readonly id: string;
   readonly name: string;
   readonly rating: number;
-  readonly notes?: string[] | null;
-  readonly Categories: AsyncCollection<RestaurantCategory>;
+  readonly notes?: (string | null)[] | null;
+  readonly categoryID: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -47,7 +47,7 @@ type EagerCategory = {
   };
   readonly id: string;
   readonly name: string;
-  readonly restaurants?: (RestaurantCategory | null)[] | null;
+  readonly Restaurants?: (Restaurant | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -59,7 +59,7 @@ type LazyCategory = {
   };
   readonly id: string;
   readonly name: string;
-  readonly restaurants: AsyncCollection<RestaurantCategory>;
+  readonly Restaurants: AsyncCollection<Restaurant>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -68,38 +68,4 @@ export declare type Category = LazyLoading extends LazyLoadingDisabled ? EagerCa
 
 export declare const Category: (new (init: ModelInit<Category>) => Category) & {
   copyOf(source: Category, mutator: (draft: MutableModel<Category>) => MutableModel<Category> | void): Category;
-}
-
-type EagerRestaurantCategory = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<RestaurantCategory, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly restaurantId?: string | null;
-  readonly categoryId?: string | null;
-  readonly restaurant: Restaurant;
-  readonly category: Category;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyRestaurantCategory = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<RestaurantCategory, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly restaurantId?: string | null;
-  readonly categoryId?: string | null;
-  readonly restaurant: AsyncItem<Restaurant>;
-  readonly category: AsyncItem<Category>;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type RestaurantCategory = LazyLoading extends LazyLoadingDisabled ? EagerRestaurantCategory : LazyRestaurantCategory
-
-export declare const RestaurantCategory: (new (init: ModelInit<RestaurantCategory>) => RestaurantCategory) & {
-  copyOf(source: RestaurantCategory, mutator: (draft: MutableModel<RestaurantCategory>) => MutableModel<RestaurantCategory> | void): RestaurantCategory;
 }
