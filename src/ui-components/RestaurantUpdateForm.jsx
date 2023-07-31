@@ -23,7 +23,7 @@ import {
   getOverrideProps,
   useDataStoreBinding,
 } from "@aws-amplify/ui-react/internal";
-import { Restaurant, Category, RestaurantCategory } from "../models";
+import { Restaurant, Category } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
 function ArrayField({
@@ -200,79 +200,59 @@ export default function RestaurantUpdateForm(props) {
     name: "",
     rating: "",
     notes: [],
-    Categories: [],
+    categoryID: undefined,
   };
   const [name, setName] = React.useState(initialValues.name);
   const [rating, setRating] = React.useState(initialValues.rating);
   const [notes, setNotes] = React.useState(initialValues.notes);
-  const [Categories, setCategories] = React.useState(initialValues.Categories);
+  const [categoryID, setCategoryID] = React.useState(initialValues.categoryID);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = restaurantRecord
-      ? { ...initialValues, ...restaurantRecord, Categories: linkedCategories }
+      ? { ...initialValues, ...restaurantRecord, categoryID }
       : initialValues;
     setName(cleanValues.name);
     setRating(cleanValues.rating);
     setNotes(cleanValues.notes ?? []);
     setCurrentNotesValue("");
-    setCategories(cleanValues.Categories ?? []);
-    setCurrentCategoriesValue(undefined);
-    setCurrentCategoriesDisplayValue("");
+    setCategoryID(cleanValues.categoryID);
+    setCurrentCategoryIDValue(undefined);
+    setCurrentCategoryIDDisplayValue("");
     setErrors({});
   };
   const [restaurantRecord, setRestaurantRecord] =
     React.useState(restaurantModelProp);
-  const [linkedCategories, setLinkedCategories] = React.useState([]);
-  const canUnlinkCategories = false;
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
         ? await DataStore.query(Restaurant, idProp)
         : restaurantModelProp;
       setRestaurantRecord(record);
-      const linkedCategories = record
-        ? await Promise.all(
-            (
-              await record.Categories.toArray()
-            ).map((r) => {
-              return r.category;
-            })
-          )
-        : [];
-      setLinkedCategories(linkedCategories);
+      const categoryIDRecord = record ? await record.categoryID : undefined;
+      setCategoryID(categoryIDRecord);
     };
     queryData();
   }, [idProp, restaurantModelProp]);
-  React.useEffect(resetStateValues, [restaurantRecord, linkedCategories]);
+  React.useEffect(resetStateValues, [restaurantRecord, categoryID]);
   const [currentNotesValue, setCurrentNotesValue] = React.useState("");
   const notesRef = React.createRef();
-  const [currentCategoriesDisplayValue, setCurrentCategoriesDisplayValue] =
+  const [currentCategoryIDDisplayValue, setCurrentCategoryIDDisplayValue] =
     React.useState("");
-  const [currentCategoriesValue, setCurrentCategoriesValue] =
+  const [currentCategoryIDValue, setCurrentCategoryIDValue] =
     React.useState(undefined);
-  const CategoriesRef = React.createRef();
-  const getIDValue = {
-    Categories: (r) => JSON.stringify({ id: r?.id }),
-  };
-  const CategoriesIdSet = new Set(
-    Array.isArray(Categories)
-      ? Categories.map((r) => getIDValue.Categories?.(r))
-      : getIDValue.Categories?.(Categories)
-  );
+  const categoryIDRef = React.createRef();
   const categoryRecords = useDataStoreBinding({
     type: "collection",
     model: Category,
   }).items;
   const getDisplayValue = {
-    Categories: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
+    categoryID: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
   const validations = {
     name: [{ type: "Required" }],
     rating: [{ type: "Required" }],
-    notes: [{ type: "Required" }],
-    Categories: [
-      { type: "Required", validationMessage: "Category is required." },
-    ],
+    notes: [],
+    categoryID: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -303,28 +283,20 @@ export default function RestaurantUpdateForm(props) {
           name,
           rating,
           notes,
-          Categories,
+          categoryID,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
             if (Array.isArray(modelFields[fieldName])) {
               promises.push(
                 ...modelFields[fieldName].map((item) =>
-                  runValidationTasks(
-                    fieldName,
-                    item,
-                    getDisplayValue[fieldName]
-                  )
+                  runValidationTasks(fieldName, item)
                 )
               );
               return promises;
             }
             promises.push(
-              runValidationTasks(
-                fieldName,
-                modelFields[fieldName],
-                getDisplayValue[fieldName]
-              )
+              runValidationTasks(fieldName, modelFields[fieldName])
             );
             return promises;
           }, [])
@@ -341,88 +313,11 @@ export default function RestaurantUpdateForm(props) {
               modelFields[key] = undefined;
             }
           });
-          const promises = [];
-          const categoriesToLinkMap = new Map();
-          const categoriesToUnLinkMap = new Map();
-          const categoriesMap = new Map();
-          const linkedCategoriesMap = new Map();
-          Categories.forEach((r) => {
-            const count = categoriesMap.get(getIDValue.Categories?.(r));
-            const newCount = count ? count + 1 : 1;
-            categoriesMap.set(getIDValue.Categories?.(r), newCount);
-          });
-          linkedCategories.forEach((r) => {
-            const count = linkedCategoriesMap.get(getIDValue.Categories?.(r));
-            const newCount = count ? count + 1 : 1;
-            linkedCategoriesMap.set(getIDValue.Categories?.(r), newCount);
-          });
-          linkedCategoriesMap.forEach((count, id) => {
-            const newCount = categoriesMap.get(id);
-            if (newCount) {
-              const diffCount = count - newCount;
-              if (diffCount > 0) {
-                categoriesToUnLinkMap.set(id, diffCount);
-              }
-            } else {
-              categoriesToUnLinkMap.set(id, count);
-            }
-          });
-          categoriesMap.forEach((count, id) => {
-            const originalCount = linkedCategoriesMap.get(id);
-            if (originalCount) {
-              const diffCount = count - originalCount;
-              if (diffCount > 0) {
-                categoriesToLinkMap.set(id, diffCount);
-              }
-            } else {
-              categoriesToLinkMap.set(id, count);
-            }
-          });
-          categoriesToUnLinkMap.forEach(async (count, id) => {
-            const recordKeys = JSON.parse(id);
-            const restaurantCategoryRecords = await DataStore.query(
-              RestaurantCategory,
-              (r) =>
-                r.and((r) => {
-                  return [
-                    r.categoryId.eq(recordKeys.id),
-                    r.restaurantId.eq(restaurantRecord.id),
-                  ];
-                })
-            );
-            for (let i = 0; i < count; i++) {
-              promises.push(DataStore.delete(restaurantCategoryRecords[i]));
-            }
-          });
-          categoriesToLinkMap.forEach((count, id) => {
-            for (let i = count; i > 0; i--) {
-              promises.push(
-                DataStore.save(
-                  new RestaurantCategory({
-                    restaurant: restaurantRecord,
-                    category: categoryRecords.find((r) =>
-                      Object.entries(JSON.parse(id)).every(
-                        ([key, value]) => r[key] === value
-                      )
-                    ),
-                  })
-                )
-              );
-            }
-          });
-          const modelFieldsToSave = {
-            name: modelFields.name,
-            rating: modelFields.rating,
-            notes: modelFields.notes,
-          };
-          promises.push(
-            DataStore.save(
-              Restaurant.copyOf(restaurantRecord, (updated) => {
-                Object.assign(updated, modelFieldsToSave);
-              })
-            )
+          await DataStore.save(
+            Restaurant.copyOf(restaurantRecord, (updated) => {
+              Object.assign(updated, modelFields);
+            })
           );
-          await Promise.all(promises);
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -447,7 +342,7 @@ export default function RestaurantUpdateForm(props) {
               name: value,
               rating,
               notes,
-              Categories,
+              categoryID,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -478,7 +373,7 @@ export default function RestaurantUpdateForm(props) {
               name,
               rating: value,
               notes,
-              Categories,
+              categoryID,
             };
             const result = onChange(modelFields);
             value = result?.rating ?? value;
@@ -501,7 +396,7 @@ export default function RestaurantUpdateForm(props) {
               name,
               rating,
               notes: values,
-              Categories,
+              categoryID,
             };
             const result = onChange(modelFields);
             values = result?.notes ?? values;
@@ -520,7 +415,7 @@ export default function RestaurantUpdateForm(props) {
       >
         <TextField
           label="Notes"
-          isRequired={true}
+          isRequired={false}
           isReadOnly={false}
           value={currentNotesValue}
           onChange={(e) => {
@@ -539,79 +434,87 @@ export default function RestaurantUpdateForm(props) {
         ></TextField>
       </ArrayField>
       <ArrayField
+        lengthLimit={1}
         onChange={async (items) => {
-          let values = items;
+          let value = items[0];
           if (onChange) {
             const modelFields = {
               name,
               rating,
               notes,
-              Categories: values,
+              categoryID: value,
             };
             const result = onChange(modelFields);
-            values = result?.Categories ?? values;
+            value = result?.categoryID ?? value;
           }
-          setCategories(values);
-          setCurrentCategoriesValue(undefined);
-          setCurrentCategoriesDisplayValue("");
+          setCategoryID(value);
+          setCurrentCategoryIDValue(undefined);
         }}
-        currentFieldValue={currentCategoriesValue}
-        label={"Categories"}
-        items={Categories}
-        hasError={errors?.Categories?.hasError}
-        errorMessage={errors?.Categories?.errorMessage}
-        getBadgeText={getDisplayValue.Categories}
-        setFieldValue={(model) => {
-          setCurrentCategoriesDisplayValue(
-            model ? getDisplayValue.Categories(model) : ""
+        currentFieldValue={currentCategoryIDValue}
+        label={"Category id"}
+        items={categoryID ? [categoryID] : []}
+        hasError={errors?.categoryID?.hasError}
+        errorMessage={errors?.categoryID?.errorMessage}
+        getBadgeText={(value) =>
+          value
+            ? getDisplayValue.categoryID(
+                categoryRecords.find((r) => r.id === value)
+              )
+            : ""
+        }
+        setFieldValue={(value) => {
+          setCurrentCategoryIDDisplayValue(
+            value
+              ? getDisplayValue.categoryID(
+                  categoryRecords.find((r) => r.id === value)
+                )
+              : ""
           );
-          setCurrentCategoriesValue(model);
+          setCurrentCategoryIDValue(value);
         }}
-        inputFieldRef={CategoriesRef}
+        inputFieldRef={categoryIDRef}
         defaultFieldValue={""}
       >
         <Autocomplete
-          label="Categories"
+          label="Category id"
           isRequired={true}
           isReadOnly={false}
           placeholder="Search Category"
-          value={currentCategoriesDisplayValue}
+          value={currentCategoryIDDisplayValue}
           options={categoryRecords
-            .filter((r) => !CategoriesIdSet.has(getIDValue.Categories?.(r)))
+            .filter(
+              (r, i, arr) =>
+                arr.findIndex((member) => member?.id === r?.id) === i
+            )
             .map((r) => ({
-              id: getIDValue.Categories?.(r),
-              label: getDisplayValue.Categories?.(r),
+              id: r?.id,
+              label: getDisplayValue.categoryID?.(r),
             }))}
           onSelect={({ id, label }) => {
-            setCurrentCategoriesValue(
-              categoryRecords.find((r) =>
-                Object.entries(JSON.parse(id)).every(
-                  ([key, value]) => r[key] === value
-                )
-              )
-            );
-            setCurrentCategoriesDisplayValue(label);
-            runValidationTasks("Categories", label);
+            setCurrentCategoryIDValue(id);
+            setCurrentCategoryIDDisplayValue(label);
+            runValidationTasks("categoryID", label);
           }}
           onClear={() => {
-            setCurrentCategoriesDisplayValue("");
+            setCurrentCategoryIDDisplayValue("");
           }}
+          defaultValue={categoryID}
           onChange={(e) => {
             let { value } = e.target;
-            if (errors.Categories?.hasError) {
-              runValidationTasks("Categories", value);
+            if (errors.categoryID?.hasError) {
+              runValidationTasks("categoryID", value);
             }
-            setCurrentCategoriesDisplayValue(value);
-            setCurrentCategoriesValue(undefined);
+            setCurrentCategoryIDDisplayValue(value);
+            setCurrentCategoryIDValue(undefined);
           }}
           onBlur={() =>
-            runValidationTasks("Categories", currentCategoriesDisplayValue)
+            runValidationTasks("categoryID", currentCategoryIDValue)
           }
-          errorMessage={errors.Categories?.errorMessage}
-          hasError={errors.Categories?.hasError}
-          ref={CategoriesRef}
+          errorMessage={errors.categoryID?.errorMessage}
+          hasError={errors.categoryID?.hasError}
+          ref={categoryIDRef}
           labelHidden={true}
-          {...getOverrideProps(overrides, "Categories")}
+          {...getOverrideProps(overrides, "categoryID")}
         ></Autocomplete>
       </ArrayField>
       <Flex

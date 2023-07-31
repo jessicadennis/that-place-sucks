@@ -23,7 +23,7 @@ import {
   getOverrideProps,
   useDataStoreBinding,
 } from "@aws-amplify/ui-react/internal";
-import { Category, Restaurant, RestaurantCategory } from "../models";
+import { Category, Restaurant } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
 function ArrayField({
@@ -198,19 +198,19 @@ export default function CategoryUpdateForm(props) {
   } = props;
   const initialValues = {
     name: "",
-    restaurants: [],
+    Restaurants: [],
   };
   const [name, setName] = React.useState(initialValues.name);
-  const [restaurants, setRestaurants] = React.useState(
-    initialValues.restaurants
+  const [Restaurants, setRestaurants] = React.useState(
+    initialValues.Restaurants
   );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = categoryRecord
-      ? { ...initialValues, ...categoryRecord, restaurants: linkedRestaurants }
+      ? { ...initialValues, ...categoryRecord, Restaurants: linkedRestaurants }
       : initialValues;
     setName(cleanValues.name);
-    setRestaurants(cleanValues.restaurants ?? []);
+    setRestaurants(cleanValues.Restaurants ?? []);
     setCurrentRestaurantsValue(undefined);
     setCurrentRestaurantsDisplayValue("");
     setErrors({});
@@ -225,13 +225,7 @@ export default function CategoryUpdateForm(props) {
         : categoryModelProp;
       setCategoryRecord(record);
       const linkedRestaurants = record
-        ? await Promise.all(
-            (
-              await record.restaurants.toArray()
-            ).map((r) => {
-              return r.restaurant;
-            })
-          )
+        ? await record.Restaurants.toArray()
         : [];
       setLinkedRestaurants(linkedRestaurants);
     };
@@ -242,25 +236,25 @@ export default function CategoryUpdateForm(props) {
     React.useState("");
   const [currentRestaurantsValue, setCurrentRestaurantsValue] =
     React.useState(undefined);
-  const restaurantsRef = React.createRef();
+  const RestaurantsRef = React.createRef();
   const getIDValue = {
-    restaurants: (r) => JSON.stringify({ id: r?.id }),
+    Restaurants: (r) => JSON.stringify({ id: r?.id }),
   };
-  const restaurantsIdSet = new Set(
-    Array.isArray(restaurants)
-      ? restaurants.map((r) => getIDValue.restaurants?.(r))
-      : getIDValue.restaurants?.(restaurants)
+  const RestaurantsIdSet = new Set(
+    Array.isArray(Restaurants)
+      ? Restaurants.map((r) => getIDValue.Restaurants?.(r))
+      : getIDValue.Restaurants?.(Restaurants)
   );
   const restaurantRecords = useDataStoreBinding({
     type: "collection",
     model: Restaurant,
   }).items;
   const getDisplayValue = {
-    restaurants: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
+    Restaurants: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
   const validations = {
     name: [{ type: "Required" }],
-    restaurants: [],
+    Restaurants: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -289,7 +283,7 @@ export default function CategoryUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           name,
-          restaurants,
+          Restaurants,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -328,73 +322,48 @@ export default function CategoryUpdateForm(props) {
             }
           });
           const promises = [];
-          const restaurantsToLinkMap = new Map();
-          const restaurantsToUnLinkMap = new Map();
-          const restaurantsMap = new Map();
-          const linkedRestaurantsMap = new Map();
-          restaurants.forEach((r) => {
-            const count = restaurantsMap.get(getIDValue.restaurants?.(r));
-            const newCount = count ? count + 1 : 1;
-            restaurantsMap.set(getIDValue.restaurants?.(r), newCount);
-          });
+          const restaurantsToLink = [];
+          const restaurantsToUnLink = [];
+          const restaurantsSet = new Set();
+          const linkedRestaurantsSet = new Set();
+          Restaurants.forEach((r) =>
+            restaurantsSet.add(getIDValue.Restaurants?.(r))
+          );
+          linkedRestaurants.forEach((r) =>
+            linkedRestaurantsSet.add(getIDValue.Restaurants?.(r))
+          );
           linkedRestaurants.forEach((r) => {
-            const count = linkedRestaurantsMap.get(getIDValue.restaurants?.(r));
-            const newCount = count ? count + 1 : 1;
-            linkedRestaurantsMap.set(getIDValue.restaurants?.(r), newCount);
-          });
-          linkedRestaurantsMap.forEach((count, id) => {
-            const newCount = restaurantsMap.get(id);
-            if (newCount) {
-              const diffCount = count - newCount;
-              if (diffCount > 0) {
-                restaurantsToUnLinkMap.set(id, diffCount);
-              }
-            } else {
-              restaurantsToUnLinkMap.set(id, count);
+            if (!restaurantsSet.has(getIDValue.Restaurants?.(r))) {
+              restaurantsToUnLink.push(r);
             }
           });
-          restaurantsMap.forEach((count, id) => {
-            const originalCount = linkedRestaurantsMap.get(id);
-            if (originalCount) {
-              const diffCount = count - originalCount;
-              if (diffCount > 0) {
-                restaurantsToLinkMap.set(id, diffCount);
-              }
-            } else {
-              restaurantsToLinkMap.set(id, count);
+          Restaurants.forEach((r) => {
+            if (!linkedRestaurantsSet.has(getIDValue.Restaurants?.(r))) {
+              restaurantsToLink.push(r);
             }
           });
-          restaurantsToUnLinkMap.forEach(async (count, id) => {
-            const recordKeys = JSON.parse(id);
-            const restaurantCategoryRecords = await DataStore.query(
-              RestaurantCategory,
-              (r) =>
-                r.and((r) => {
-                  return [
-                    r.restaurantId.eq(recordKeys.id),
-                    r.categoryId.eq(categoryRecord.id),
-                  ];
-                })
-            );
-            for (let i = 0; i < count; i++) {
-              promises.push(DataStore.delete(restaurantCategoryRecords[i]));
-            }
-          });
-          restaurantsToLinkMap.forEach((count, id) => {
-            for (let i = count; i > 0; i--) {
-              promises.push(
-                DataStore.save(
-                  new RestaurantCategory({
-                    category: categoryRecord,
-                    restaurant: restaurantRecords.find((r) =>
-                      Object.entries(JSON.parse(id)).every(
-                        ([key, value]) => r[key] === value
-                      )
-                    ),
-                  })
-                )
+          restaurantsToUnLink.forEach((original) => {
+            if (!canUnlinkRestaurants) {
+              throw Error(
+                `Restaurant ${original.id} cannot be unlinked from Category because categoryID is a required field.`
               );
             }
+            promises.push(
+              DataStore.save(
+                Restaurant.copyOf(original, (updated) => {
+                  updated.categoryID = null;
+                })
+              )
+            );
+          });
+          restaurantsToLink.forEach((original) => {
+            promises.push(
+              DataStore.save(
+                Restaurant.copyOf(original, (updated) => {
+                  updated.categoryID = categoryRecord.id;
+                })
+              )
+            );
           });
           const modelFieldsToSave = {
             name: modelFields.name,
@@ -429,7 +398,7 @@ export default function CategoryUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               name: value,
-              restaurants,
+              Restaurants,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -450,10 +419,10 @@ export default function CategoryUpdateForm(props) {
           if (onChange) {
             const modelFields = {
               name,
-              restaurants: values,
+              Restaurants: values,
             };
             const result = onChange(modelFields);
-            values = result?.restaurants ?? values;
+            values = result?.Restaurants ?? values;
           }
           setRestaurants(values);
           setCurrentRestaurantsValue(undefined);
@@ -461,17 +430,17 @@ export default function CategoryUpdateForm(props) {
         }}
         currentFieldValue={currentRestaurantsValue}
         label={"Restaurants"}
-        items={restaurants}
-        hasError={errors?.restaurants?.hasError}
-        errorMessage={errors?.restaurants?.errorMessage}
-        getBadgeText={getDisplayValue.restaurants}
+        items={Restaurants}
+        hasError={errors?.Restaurants?.hasError}
+        errorMessage={errors?.Restaurants?.errorMessage}
+        getBadgeText={getDisplayValue.Restaurants}
         setFieldValue={(model) => {
           setCurrentRestaurantsDisplayValue(
-            model ? getDisplayValue.restaurants(model) : ""
+            model ? getDisplayValue.Restaurants(model) : ""
           );
           setCurrentRestaurantsValue(model);
         }}
-        inputFieldRef={restaurantsRef}
+        inputFieldRef={RestaurantsRef}
         defaultFieldValue={""}
       >
         <Autocomplete
@@ -481,10 +450,10 @@ export default function CategoryUpdateForm(props) {
           placeholder="Search Restaurant"
           value={currentRestaurantsDisplayValue}
           options={restaurantRecords
-            .filter((r) => !restaurantsIdSet.has(getIDValue.restaurants?.(r)))
+            .filter((r) => !RestaurantsIdSet.has(getIDValue.Restaurants?.(r)))
             .map((r) => ({
-              id: getIDValue.restaurants?.(r),
-              label: getDisplayValue.restaurants?.(r),
+              id: getIDValue.Restaurants?.(r),
+              label: getDisplayValue.Restaurants?.(r),
             }))}
           onSelect={({ id, label }) => {
             setCurrentRestaurantsValue(
@@ -495,27 +464,27 @@ export default function CategoryUpdateForm(props) {
               )
             );
             setCurrentRestaurantsDisplayValue(label);
-            runValidationTasks("restaurants", label);
+            runValidationTasks("Restaurants", label);
           }}
           onClear={() => {
             setCurrentRestaurantsDisplayValue("");
           }}
           onChange={(e) => {
             let { value } = e.target;
-            if (errors.restaurants?.hasError) {
-              runValidationTasks("restaurants", value);
+            if (errors.Restaurants?.hasError) {
+              runValidationTasks("Restaurants", value);
             }
             setCurrentRestaurantsDisplayValue(value);
             setCurrentRestaurantsValue(undefined);
           }}
           onBlur={() =>
-            runValidationTasks("restaurants", currentRestaurantsDisplayValue)
+            runValidationTasks("Restaurants", currentRestaurantsDisplayValue)
           }
-          errorMessage={errors.restaurants?.errorMessage}
-          hasError={errors.restaurants?.hasError}
-          ref={restaurantsRef}
+          errorMessage={errors.Restaurants?.errorMessage}
+          hasError={errors.Restaurants?.hasError}
+          ref={RestaurantsRef}
           labelHidden={true}
-          {...getOverrideProps(overrides, "restaurants")}
+          {...getOverrideProps(overrides, "Restaurants")}
         ></Autocomplete>
       </ArrayField>
       <Flex

@@ -7,6 +7,19 @@ Amplify.configure(awsconfig);
 
 export default function PlaceList() {
   const [places, setPlaces] = useState([]);
+
+  useEffect(() => {
+    API.graphql({
+      query: listRestaurants,
+      variables: { limit: 5 },
+    })
+      .then((resp) => {
+        const restaurants = resp?.data?.listRestaurants?.items ?? [];
+        setPlaces(restaurants);
+      })
+      .catch((error) => console.error(error));
+  }, []);
+
   const pluralize = (count) => (count > 1 ? "notes" : "note");
   const formatDate = (dateString) => {
     try {
@@ -16,6 +29,13 @@ export default function PlaceList() {
       console.log(`error parsing date: ${dateString}`);
       return "";
     }
+  };
+  const getDisabled = (notes) => {
+    if (!notes || notes?.length === 0) {
+      return " disabled pe-none ";
+    }
+
+    return "";
   };
   const getBarColor = (rating) => {
     const colors = {
@@ -51,19 +71,6 @@ export default function PlaceList() {
     }
   };
 
-  useEffect(() => {
-    API.graphql({
-      query: listRestaurants,
-      variables: { limit: 5 },
-    })
-      .then((data) => {
-        console.log(data);
-        const restaurants = data?.data?.listRestaurants?.items ?? [];
-        setPlaces(restaurants);
-      })
-      .catch((error) => console.error(error));
-  }, []);
-
   return (
     <div
       className="accordion"
@@ -76,13 +83,14 @@ export default function PlaceList() {
             <button
               className={
                 "accordion-button rounded-0 bg-secondary text-dark border-start border-5 border-" +
-                getBarColor(place.rating)
+                getBarColor(place.rating) +
+                getDisabled(place?.notes)
               }
               type="button"
               data-bs-toggle="collapse"
               data-bs-target={"#item-" + place.id}
               aria-controls={"item-" + place.id}
-              disabled={place.notes.count === 0}>
+              disabled={!place?.notes || place?.notes?.length === 0}>
               <div className="container-fluid">
                 <div className="row">
                   <div className="col-4">
@@ -93,7 +101,8 @@ export default function PlaceList() {
                     Last updated: {formatDate(place.updatedAt)}
                   </div>
                   <div className="col-2 text-end">
-                    {place.notes.length} {pluralize(place.notes.length)}
+                    {place.notes?.length ?? ""}{" "}
+                    {place.notes?.length ? pluralize(place.notes?.length) : ""}
                   </div>
                 </div>
               </div>
@@ -105,7 +114,7 @@ export default function PlaceList() {
             data-bs-parent="#places-accordion">
             <div className="accordion-body">
               <ul>
-                {place.notes.map((note) => (
+                {place.notes?.map((note) => (
                   <li key={crypto.randomUUID()}>{note}</li>
                 ))}
               </ul>
@@ -113,17 +122,6 @@ export default function PlaceList() {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-function PlaceItem(props) {
-  const { name, rating, notes } = props;
-  return (
-    <div className="d-flex align-items-center justify-between">
-      <span className="name">{name}</span>
-      <span className="rating">{rating}</span>
-      <span className="notes">{notes?.length ?? 0}</span>
     </div>
   );
 }

@@ -7,7 +7,6 @@
 import * as React from "react";
 import { AutocompleteProps, GridProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { EscapeHatchProps } from "@aws-amplify/ui-react/internal";
-import { Category } from "../models";
 export declare type ValidationResponse = {
     hasError: boolean;
     errorMessage?: string;
@@ -17,13 +16,13 @@ export declare type RestaurantCreateFormInputValues = {
     name?: string;
     rating?: number;
     notes?: string[];
-    Categories?: Category[];
+    categoryID?: string;
 };
 export declare type RestaurantCreateFormValidationValues = {
     name?: ValidationFunction<string>;
     rating?: ValidationFunction<number>;
     notes?: ValidationFunction<string>;
-    Categories?: ValidationFunction<Category>;
+    categoryID?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type RestaurantCreateFormOverridesProps = {
@@ -31,7 +30,7 @@ export declare type RestaurantCreateFormOverridesProps = {
     name?: PrimitiveOverrideProps<TextFieldProps>;
     rating?: PrimitiveOverrideProps<TextFieldProps>;
     notes?: PrimitiveOverrideProps<TextFieldProps>;
-    Categories?: PrimitiveOverrideProps<AutocompleteProps>;
+    categoryID?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
 export declare type RestaurantCreateFormProps = React.PropsWithChildren<{
     overrides?: RestaurantCreateFormOverridesProps | undefined | null;
