@@ -35,6 +35,10 @@ const router = createBrowserRouter([
         path: "add",
         element: <PlaceForm />,
       },
+      {
+        path: "login",
+        element: <PlaceList />,
+      },
     ],
   },
 ]);

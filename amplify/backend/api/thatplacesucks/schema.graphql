@@ -1,9 +1,17 @@
+type Notes @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  note: String!
+  restaurantID: ID! @index(name: "byRestaurant")
+  author: String!
+  authorEmail: String!
+}
+
 type Restaurant @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
   rating: Int!
-  notes: [String]
   categoryID: ID! @index(name: "byCategory")
+  Notes: [Notes] @hasMany(indexName: "byRestaurant", fields: ["id"])
 }
 
 type Category @model @auth(rules: [{allow: public}]) {

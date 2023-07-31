@@ -23,7 +23,7 @@ import {
   getOverrideProps,
   useDataStoreBinding,
 } from "@aws-amplify/ui-react/internal";
-import { Restaurant, Notes as Notes0, Category } from "../models";
+import { Notes, Restaurant } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
 function ArrayField({
@@ -184,7 +184,7 @@ function ArrayField({
     </React.Fragment>
   );
 }
-export default function RestaurantCreateForm(props) {
+export default function NotesCreateForm(props) {
   const {
     clearOnSuccess = true,
     onSuccess,
@@ -196,61 +196,46 @@ export default function RestaurantCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    name: "",
-    rating: "",
-    categoryID: undefined,
-    Notes: [],
+    note: "",
+    restaurantID: undefined,
+    author: "",
+    authorEmail: "",
   };
-  const [name, setName] = React.useState(initialValues.name);
-  const [rating, setRating] = React.useState(initialValues.rating);
-  const [categoryID, setCategoryID] = React.useState(initialValues.categoryID);
-  const [Notes, setNotes] = React.useState(initialValues.Notes);
+  const [note, setNote] = React.useState(initialValues.note);
+  const [restaurantID, setRestaurantID] = React.useState(
+    initialValues.restaurantID
+  );
+  const [author, setAuthor] = React.useState(initialValues.author);
+  const [authorEmail, setAuthorEmail] = React.useState(
+    initialValues.authorEmail
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setName(initialValues.name);
-    setRating(initialValues.rating);
-    setCategoryID(initialValues.categoryID);
-    setCurrentCategoryIDValue(undefined);
-    setCurrentCategoryIDDisplayValue("");
-    setNotes(initialValues.Notes);
-    setCurrentNotesValue(undefined);
-    setCurrentNotesDisplayValue("");
+    setNote(initialValues.note);
+    setRestaurantID(initialValues.restaurantID);
+    setCurrentRestaurantIDValue(undefined);
+    setCurrentRestaurantIDDisplayValue("");
+    setAuthor(initialValues.author);
+    setAuthorEmail(initialValues.authorEmail);
     setErrors({});
   };
-  const [currentCategoryIDDisplayValue, setCurrentCategoryIDDisplayValue] =
+  const [currentRestaurantIDDisplayValue, setCurrentRestaurantIDDisplayValue] =
     React.useState("");
-  const [currentCategoryIDValue, setCurrentCategoryIDValue] =
+  const [currentRestaurantIDValue, setCurrentRestaurantIDValue] =
     React.useState(undefined);
-  const categoryIDRef = React.createRef();
-  const [currentNotesDisplayValue, setCurrentNotesDisplayValue] =
-    React.useState("");
-  const [currentNotesValue, setCurrentNotesValue] = React.useState(undefined);
-  const NotesRef = React.createRef();
-  const getIDValue = {
-    Notes: (r) => JSON.stringify({ id: r?.id }),
-  };
-  const NotesIdSet = new Set(
-    Array.isArray(Notes)
-      ? Notes.map((r) => getIDValue.Notes?.(r))
-      : getIDValue.Notes?.(Notes)
-  );
-  const categoryRecords = useDataStoreBinding({
+  const restaurantIDRef = React.createRef();
+  const restaurantRecords = useDataStoreBinding({
     type: "collection",
-    model: Category,
-  }).items;
-  const notesRecords = useDataStoreBinding({
-    type: "collection",
-    model: Notes0,
+    model: Restaurant,
   }).items;
   const getDisplayValue = {
-    categoryID: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
-    Notes: (r) => `${r?.note ? r?.note + " - " : ""}${r?.id}`,
+    restaurantID: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
   const validations = {
-    name: [{ type: "Required" }],
-    rating: [{ type: "Required" }],
-    categoryID: [{ type: "Required" }],
-    Notes: [],
+    note: [{ type: "Required" }],
+    restaurantID: [{ type: "Required" }],
+    author: [{ type: "Required" }],
+    authorEmail: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -278,31 +263,23 @@ export default function RestaurantCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          name,
-          rating,
-          categoryID,
-          Notes,
+          note,
+          restaurantID,
+          author,
+          authorEmail,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
             if (Array.isArray(modelFields[fieldName])) {
               promises.push(
                 ...modelFields[fieldName].map((item) =>
-                  runValidationTasks(
-                    fieldName,
-                    item,
-                    getDisplayValue[fieldName]
-                  )
+                  runValidationTasks(fieldName, item)
                 )
               );
               return promises;
             }
             promises.push(
-              runValidationTasks(
-                fieldName,
-                modelFields[fieldName],
-                getDisplayValue[fieldName]
-              )
+              runValidationTasks(fieldName, modelFields[fieldName])
             );
             return promises;
           }, [])
@@ -319,28 +296,7 @@ export default function RestaurantCreateForm(props) {
               modelFields[key] = undefined;
             }
           });
-          const modelFieldsToSave = {
-            name: modelFields.name,
-            rating: modelFields.rating,
-            categoryID: modelFields.categoryID,
-          };
-          const restaurant = await DataStore.save(
-            new Restaurant(modelFieldsToSave)
-          );
-          const promises = [];
-          promises.push(
-            ...Notes.reduce((promises, original) => {
-              promises.push(
-                DataStore.save(
-                  Notes.copyOf(original, (updated) => {
-                    updated.restaurantID = restaurant.id;
-                  })
-                )
-              );
-              return promises;
-            }, [])
-          );
-          await Promise.all(promises);
+          await DataStore.save(new Notes(modelFields));
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -353,66 +309,35 @@ export default function RestaurantCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "RestaurantCreateForm")}
+      {...getOverrideProps(overrides, "NotesCreateForm")}
       {...rest}
     >
       <TextField
-        label="Name"
+        label="Note"
         isRequired={true}
         isReadOnly={false}
-        value={name}
+        value={note}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              name: value,
-              rating,
-              categoryID,
-              Notes,
+              note: value,
+              restaurantID,
+              author,
+              authorEmail,
             };
             const result = onChange(modelFields);
-            value = result?.name ?? value;
+            value = result?.note ?? value;
           }
-          if (errors.name?.hasError) {
-            runValidationTasks("name", value);
+          if (errors.note?.hasError) {
+            runValidationTasks("note", value);
           }
-          setName(value);
+          setNote(value);
         }}
-        onBlur={() => runValidationTasks("name", name)}
-        errorMessage={errors.name?.errorMessage}
-        hasError={errors.name?.hasError}
-        {...getOverrideProps(overrides, "name")}
-      ></TextField>
-      <TextField
-        label="Rating"
-        isRequired={true}
-        isReadOnly={false}
-        type="number"
-        step="any"
-        value={rating}
-        onChange={(e) => {
-          let value = isNaN(parseInt(e.target.value))
-            ? e.target.value
-            : parseInt(e.target.value);
-          if (onChange) {
-            const modelFields = {
-              name,
-              rating: value,
-              categoryID,
-              Notes,
-            };
-            const result = onChange(modelFields);
-            value = result?.rating ?? value;
-          }
-          if (errors.rating?.hasError) {
-            runValidationTasks("rating", value);
-          }
-          setRating(value);
-        }}
-        onBlur={() => runValidationTasks("rating", rating)}
-        errorMessage={errors.rating?.errorMessage}
-        hasError={errors.rating?.hasError}
-        {...getOverrideProps(overrides, "rating")}
+        onBlur={() => runValidationTasks("note", note)}
+        errorMessage={errors.note?.errorMessage}
+        hasError={errors.note?.hasError}
+        {...getOverrideProps(overrides, "note")}
       ></TextField>
       <ArrayField
         lengthLimit={1}
@@ -420,157 +345,137 @@ export default function RestaurantCreateForm(props) {
           let value = items[0];
           if (onChange) {
             const modelFields = {
-              name,
-              rating,
-              categoryID: value,
-              Notes,
+              note,
+              restaurantID: value,
+              author,
+              authorEmail,
             };
             const result = onChange(modelFields);
-            value = result?.categoryID ?? value;
+            value = result?.restaurantID ?? value;
           }
-          setCategoryID(value);
-          setCurrentCategoryIDValue(undefined);
+          setRestaurantID(value);
+          setCurrentRestaurantIDValue(undefined);
         }}
-        currentFieldValue={currentCategoryIDValue}
-        label={"Category id"}
-        items={categoryID ? [categoryID] : []}
-        hasError={errors?.categoryID?.hasError}
-        errorMessage={errors?.categoryID?.errorMessage}
+        currentFieldValue={currentRestaurantIDValue}
+        label={"Restaurant id"}
+        items={restaurantID ? [restaurantID] : []}
+        hasError={errors?.restaurantID?.hasError}
+        errorMessage={errors?.restaurantID?.errorMessage}
         getBadgeText={(value) =>
           value
-            ? getDisplayValue.categoryID(
-                categoryRecords.find((r) => r.id === value)
+            ? getDisplayValue.restaurantID(
+                restaurantRecords.find((r) => r.id === value)
               )
             : ""
         }
         setFieldValue={(value) => {
-          setCurrentCategoryIDDisplayValue(
+          setCurrentRestaurantIDDisplayValue(
             value
-              ? getDisplayValue.categoryID(
-                  categoryRecords.find((r) => r.id === value)
+              ? getDisplayValue.restaurantID(
+                  restaurantRecords.find((r) => r.id === value)
                 )
               : ""
           );
-          setCurrentCategoryIDValue(value);
+          setCurrentRestaurantIDValue(value);
         }}
-        inputFieldRef={categoryIDRef}
+        inputFieldRef={restaurantIDRef}
         defaultFieldValue={""}
       >
         <Autocomplete
-          label="Category id"
+          label="Restaurant id"
           isRequired={true}
           isReadOnly={false}
-          placeholder="Search Category"
-          value={currentCategoryIDDisplayValue}
-          options={categoryRecords
+          placeholder="Search Restaurant"
+          value={currentRestaurantIDDisplayValue}
+          options={restaurantRecords
             .filter(
               (r, i, arr) =>
                 arr.findIndex((member) => member?.id === r?.id) === i
             )
             .map((r) => ({
               id: r?.id,
-              label: getDisplayValue.categoryID?.(r),
+              label: getDisplayValue.restaurantID?.(r),
             }))}
           onSelect={({ id, label }) => {
-            setCurrentCategoryIDValue(id);
-            setCurrentCategoryIDDisplayValue(label);
-            runValidationTasks("categoryID", label);
+            setCurrentRestaurantIDValue(id);
+            setCurrentRestaurantIDDisplayValue(label);
+            runValidationTasks("restaurantID", label);
           }}
           onClear={() => {
-            setCurrentCategoryIDDisplayValue("");
+            setCurrentRestaurantIDDisplayValue("");
           }}
           onChange={(e) => {
             let { value } = e.target;
-            if (errors.categoryID?.hasError) {
-              runValidationTasks("categoryID", value);
+            if (errors.restaurantID?.hasError) {
+              runValidationTasks("restaurantID", value);
             }
-            setCurrentCategoryIDDisplayValue(value);
-            setCurrentCategoryIDValue(undefined);
+            setCurrentRestaurantIDDisplayValue(value);
+            setCurrentRestaurantIDValue(undefined);
           }}
           onBlur={() =>
-            runValidationTasks("categoryID", currentCategoryIDValue)
+            runValidationTasks("restaurantID", currentRestaurantIDValue)
           }
-          errorMessage={errors.categoryID?.errorMessage}
-          hasError={errors.categoryID?.hasError}
-          ref={categoryIDRef}
+          errorMessage={errors.restaurantID?.errorMessage}
+          hasError={errors.restaurantID?.hasError}
+          ref={restaurantIDRef}
           labelHidden={true}
-          {...getOverrideProps(overrides, "categoryID")}
+          {...getOverrideProps(overrides, "restaurantID")}
         ></Autocomplete>
       </ArrayField>
-      <ArrayField
-        onChange={async (items) => {
-          let values = items;
+      <TextField
+        label="Author"
+        isRequired={true}
+        isReadOnly={false}
+        value={author}
+        onChange={(e) => {
+          let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              name,
-              rating,
-              categoryID,
-              Notes: values,
+              note,
+              restaurantID,
+              author: value,
+              authorEmail,
             };
             const result = onChange(modelFields);
-            values = result?.Notes ?? values;
+            value = result?.author ?? value;
           }
-          setNotes(values);
-          setCurrentNotesValue(undefined);
-          setCurrentNotesDisplayValue("");
+          if (errors.author?.hasError) {
+            runValidationTasks("author", value);
+          }
+          setAuthor(value);
         }}
-        currentFieldValue={currentNotesValue}
-        label={"Notes"}
-        items={Notes}
-        hasError={errors?.Notes?.hasError}
-        errorMessage={errors?.Notes?.errorMessage}
-        getBadgeText={getDisplayValue.Notes}
-        setFieldValue={(model) => {
-          setCurrentNotesDisplayValue(
-            model ? getDisplayValue.Notes(model) : ""
-          );
-          setCurrentNotesValue(model);
+        onBlur={() => runValidationTasks("author", author)}
+        errorMessage={errors.author?.errorMessage}
+        hasError={errors.author?.hasError}
+        {...getOverrideProps(overrides, "author")}
+      ></TextField>
+      <TextField
+        label="Author email"
+        isRequired={true}
+        isReadOnly={false}
+        value={authorEmail}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              note,
+              restaurantID,
+              author,
+              authorEmail: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.authorEmail ?? value;
+          }
+          if (errors.authorEmail?.hasError) {
+            runValidationTasks("authorEmail", value);
+          }
+          setAuthorEmail(value);
         }}
-        inputFieldRef={NotesRef}
-        defaultFieldValue={""}
-      >
-        <Autocomplete
-          label="Notes"
-          isRequired={false}
-          isReadOnly={false}
-          placeholder="Search Notes"
-          value={currentNotesDisplayValue}
-          options={notesRecords
-            .filter((r) => !NotesIdSet.has(getIDValue.Notes?.(r)))
-            .map((r) => ({
-              id: getIDValue.Notes?.(r),
-              label: getDisplayValue.Notes?.(r),
-            }))}
-          onSelect={({ id, label }) => {
-            setCurrentNotesValue(
-              notesRecords.find((r) =>
-                Object.entries(JSON.parse(id)).every(
-                  ([key, value]) => r[key] === value
-                )
-              )
-            );
-            setCurrentNotesDisplayValue(label);
-            runValidationTasks("Notes", label);
-          }}
-          onClear={() => {
-            setCurrentNotesDisplayValue("");
-          }}
-          onChange={(e) => {
-            let { value } = e.target;
-            if (errors.Notes?.hasError) {
-              runValidationTasks("Notes", value);
-            }
-            setCurrentNotesDisplayValue(value);
-            setCurrentNotesValue(undefined);
-          }}
-          onBlur={() => runValidationTasks("Notes", currentNotesDisplayValue)}
-          errorMessage={errors.Notes?.errorMessage}
-          hasError={errors.Notes?.hasError}
-          ref={NotesRef}
-          labelHidden={true}
-          {...getOverrideProps(overrides, "Notes")}
-        ></Autocomplete>
-      </ArrayField>
+        onBlur={() => runValidationTasks("authorEmail", authorEmail)}
+        errorMessage={errors.authorEmail?.errorMessage}
+        hasError={errors.authorEmail?.hasError}
+        {...getOverrideProps(overrides, "authorEmail")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

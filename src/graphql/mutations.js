@@ -1,6 +1,66 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const createNotes = /* GraphQL */ `
+  mutation CreateNotes(
+    $input: CreateNotesInput!
+    $condition: ModelNotesConditionInput
+  ) {
+    createNotes(input: $input, condition: $condition) {
+      id
+      note
+      restaurantID
+      author
+      authorEmail
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+  }
+`;
+export const updateNotes = /* GraphQL */ `
+  mutation UpdateNotes(
+    $input: UpdateNotesInput!
+    $condition: ModelNotesConditionInput
+  ) {
+    updateNotes(input: $input, condition: $condition) {
+      id
+      note
+      restaurantID
+      author
+      authorEmail
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+  }
+`;
+export const deleteNotes = /* GraphQL */ `
+  mutation DeleteNotes(
+    $input: DeleteNotesInput!
+    $condition: ModelNotesConditionInput
+  ) {
+    deleteNotes(input: $input, condition: $condition) {
+      id
+      note
+      restaurantID
+      author
+      authorEmail
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+  }
+`;
 export const createRestaurant = /* GraphQL */ `
   mutation CreateRestaurant(
     $input: CreateRestaurantInput!
@@ -10,8 +70,8 @@ export const createRestaurant = /* GraphQL */ `
       id
       name
       rating
-      notes
-      Categories {
+      categoryID
+      Notes {
         nextToken
         startedAt
         __typename
@@ -34,8 +94,8 @@ export const updateRestaurant = /* GraphQL */ `
       id
       name
       rating
-      notes
-      Categories {
+      categoryID
+      Notes {
         nextToken
         startedAt
         __typename
@@ -58,8 +118,8 @@ export const deleteRestaurant = /* GraphQL */ `
       id
       name
       rating
-      notes
-      Categories {
+      categoryID
+      Notes {
         nextToken
         startedAt
         __typename
@@ -81,7 +141,7 @@ export const createCategory = /* GraphQL */ `
     createCategory(input: $input, condition: $condition) {
       id
       name
-      restaurants {
+      Restaurants {
         nextToken
         startedAt
         __typename
@@ -103,7 +163,7 @@ export const updateCategory = /* GraphQL */ `
     updateCategory(input: $input, condition: $condition) {
       id
       name
-      restaurants {
+      Restaurants {
         nextToken
         startedAt
         __typename
@@ -125,129 +185,9 @@ export const deleteCategory = /* GraphQL */ `
     deleteCategory(input: $input, condition: $condition) {
       id
       name
-      restaurants {
+      Restaurants {
         nextToken
         startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-  }
-`;
-export const createRestaurantCategory = /* GraphQL */ `
-  mutation CreateRestaurantCategory(
-    $input: CreateRestaurantCategoryInput!
-    $condition: ModelRestaurantCategoryConditionInput
-  ) {
-    createRestaurantCategory(input: $input, condition: $condition) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-  }
-`;
-export const updateRestaurantCategory = /* GraphQL */ `
-  mutation UpdateRestaurantCategory(
-    $input: UpdateRestaurantCategoryInput!
-    $condition: ModelRestaurantCategoryConditionInput
-  ) {
-    updateRestaurantCategory(input: $input, condition: $condition) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-  }
-`;
-export const deleteRestaurantCategory = /* GraphQL */ `
-  mutation DeleteRestaurantCategory(
-    $input: DeleteRestaurantCategoryInput!
-    $condition: ModelRestaurantCategoryConditionInput
-  ) {
-    deleteRestaurantCategory(input: $input, condition: $condition) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        notes
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       createdAt

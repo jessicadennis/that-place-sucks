@@ -6,6 +6,40 @@ import { LazyLoading, LazyLoadingDisabled, AsyncCollection } from "@aws-amplify/
 
 
 
+type EagerNotes = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Notes, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly note: string;
+  readonly restaurantID: string;
+  readonly author: string;
+  readonly authorEmail: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyNotes = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Notes, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly note: string;
+  readonly restaurantID: string;
+  readonly author: string;
+  readonly authorEmail: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Notes = LazyLoading extends LazyLoadingDisabled ? EagerNotes : LazyNotes
+
+export declare const Notes: (new (init: ModelInit<Notes>) => Notes) & {
+  copyOf(source: Notes, mutator: (draft: MutableModel<Notes>) => MutableModel<Notes> | void): Notes;
+}
+
 type EagerRestaurant = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Restaurant, 'id'>;
@@ -14,8 +48,8 @@ type EagerRestaurant = {
   readonly id: string;
   readonly name: string;
   readonly rating: number;
-  readonly notes?: (string | null)[] | null;
   readonly categoryID: string;
+  readonly Notes?: (Notes | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -28,8 +62,8 @@ type LazyRestaurant = {
   readonly id: string;
   readonly name: string;
   readonly rating: number;
-  readonly notes?: (string | null)[] | null;
   readonly categoryID: string;
+  readonly Notes: AsyncCollection<Notes>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
