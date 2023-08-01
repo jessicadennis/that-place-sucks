@@ -1,16 +1,23 @@
-import { createColumnHelper } from "@tanstack/react-table";
-import { useQuery } from "react-query";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Amplify, API } from "aws-amplify";
-import {
-  listRestaurantsWithNotes,
-  listValidCategories,
-} from "../graphql/custom-queries";
+import { createColumnHelper } from "@tanstack/react-table";
+import { GraphQLResult } from "@aws-amplify/api-graphql";
+import { listRestaurants } from "../graphql/queries";
+import { ListRestaurantsQuery } from "../API";
+import { useQuery } from "react-query";
 import awsconfig from "../aws-exports";
 import Table from "./Table";
 
+interface RestaurantRow {
+  name: string;
+  rating: number;
+  updatedAt: string;
+  noteCount: number;
+}
+
 Amplify.configure(awsconfig);
 
-const columnHelper = createColumnHelper();
+const columnHelper = createColumnHelper<RestaurantRow>();
 
 const columns = [
   columnHelper.accessor("name", {
@@ -31,7 +38,7 @@ const columns = [
   }),
 ];
 
-function formatDate(dateString) {
+function formatDate(dateString: string) {
   try {
     const date = new Date(dateString);
     return Intl.DateTimeFormat("en-US").format(date);
@@ -42,18 +49,22 @@ function formatDate(dateString) {
 }
 
 async function getRestaurants() {
-  const resp = await API.graphql({
-    query: listRestaurantsWithNotes,
+  const resp = (await API.graphql<ListRestaurantsQuery>({
+    query: listRestaurants,
     variables: { limit: 10 },
-  });
+  })) as GraphQLResult<any>;
+
+  formatDate("");
+
+  console.log(resp);
 
   const result = resp?.data?.listRestaurants?.items ?? [];
-  const places = result.map((place) => ({
+  const places = result.map((place: any) => ({
     name: place.name,
     rating: place.rating,
-    noteCount: place.Notes.items?.length,
-    notes: place.Notes?.items ?? [],
-    updatedAt: formatDate(place.updatedAt),
+    noteCount: place.notes?.items?.length,
+    notes: place.notes?.items ?? [],
+    updatedAt: formatDate(place?.updatedAt ?? ""),
   }));
 
   return {
@@ -64,8 +75,6 @@ async function getRestaurants() {
 
 export default function PlacesTable() {
   const query = useQuery("restaurants", getRestaurants);
-
-  console.log(query?.data?.rows);
 
   if (query?.isLoading) {
     return <div>Loading</div>;

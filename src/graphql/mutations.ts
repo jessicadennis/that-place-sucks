@@ -1,3 +1,4 @@
+/* tslint:disable */
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
@@ -72,6 +73,19 @@ export const createRestaurant = /* GraphQL */ `
       rating
       categoryID
       notes {
+        items {
+          id
+          note
+          restaurantID
+          author
+          authorEmail
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -79,6 +93,23 @@ export const createRestaurant = /* GraphQL */ `
       category {
         id
         name
+        Restaurants {
+          items {
+            id
+            name
+            rating
+            categoryID
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -106,6 +137,19 @@ export const updateRestaurant = /* GraphQL */ `
       rating
       categoryID
       notes {
+        items {
+          id
+          note
+          restaurantID
+          author
+          authorEmail
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -113,6 +157,23 @@ export const updateRestaurant = /* GraphQL */ `
       category {
         id
         name
+        Restaurants {
+          items {
+            id
+            name
+            rating
+            categoryID
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -140,6 +201,19 @@ export const deleteRestaurant = /* GraphQL */ `
       rating
       categoryID
       notes {
+        items {
+          id
+          note
+          restaurantID
+          author
+          authorEmail
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -147,6 +221,23 @@ export const deleteRestaurant = /* GraphQL */ `
       category {
         id
         name
+        Restaurants {
+          items {
+            id
+            name
+            rating
+            categoryID
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -172,6 +263,33 @@ export const createCategory = /* GraphQL */ `
       id
       name
       Restaurants {
+        items {
+          id
+          name
+          rating
+          categoryID
+          notes {
+            nextToken
+            startedAt
+            __typename
+          }
+          category {
+            id
+            name
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -194,6 +312,33 @@ export const updateCategory = /* GraphQL */ `
       id
       name
       Restaurants {
+        items {
+          id
+          name
+          rating
+          categoryID
+          notes {
+            nextToken
+            startedAt
+            __typename
+          }
+          category {
+            id
+            name
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -216,6 +361,33 @@ export const deleteCategory = /* GraphQL */ `
       id
       name
       Restaurants {
+        items {
+          id
+          name
+          rating
+          categoryID
+          notes {
+            nextToken
+            startedAt
+            __typename
+          }
+          category {
+            id
+            name
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename

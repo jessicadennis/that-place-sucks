@@ -352,6 +352,7 @@ export default function CategoryUpdateForm(props) {
               DataStore.save(
                 Restaurant.copyOf(original, (updated) => {
                   updated.categoryID = null;
+                  updated.category = null;
                 })
               )
             );
@@ -361,6 +362,7 @@ export default function CategoryUpdateForm(props) {
               DataStore.save(
                 Restaurant.copyOf(original, (updated) => {
                   updated.categoryID = categoryRecord.id;
+                  updated.category = categoryRecord;
                 })
               )
             );

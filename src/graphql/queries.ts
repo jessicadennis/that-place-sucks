@@ -1,3 +1,4 @@
+/* tslint:disable */
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
@@ -118,6 +119,19 @@ export const getRestaurant = /* GraphQL */ `
       rating
       categoryID
       notes {
+        items {
+          id
+          note
+          restaurantID
+          author
+          authorEmail
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -125,6 +139,23 @@ export const getRestaurant = /* GraphQL */ `
       category {
         id
         name
+        Restaurants {
+          items {
+            id
+            name
+            rating
+            categoryID
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -153,6 +184,39 @@ export const listRestaurants = /* GraphQL */ `
         name
         rating
         categoryID
+        notes {
+          items {
+            id
+            note
+            restaurantID
+            author
+            authorEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        category {
+          id
+          name
+          Restaurants {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -184,6 +248,39 @@ export const syncRestaurants = /* GraphQL */ `
         name
         rating
         categoryID
+        notes {
+          items {
+            id
+            note
+            restaurantID
+            author
+            authorEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        category {
+          id
+          name
+          Restaurants {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -217,6 +314,39 @@ export const restaurantsByCategoryID = /* GraphQL */ `
         name
         rating
         categoryID
+        notes {
+          items {
+            id
+            note
+            restaurantID
+            author
+            authorEmail
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
+        category {
+          id
+          name
+          Restaurants {
+            nextToken
+            startedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -236,6 +366,33 @@ export const getCategory = /* GraphQL */ `
       id
       name
       Restaurants {
+        items {
+          id
+          name
+          rating
+          categoryID
+          notes {
+            nextToken
+            startedAt
+            __typename
+          }
+          category {
+            id
+            name
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
         nextToken
         startedAt
         __typename
@@ -259,6 +416,23 @@ export const listCategories = /* GraphQL */ `
       items {
         id
         name
+        Restaurants {
+          items {
+            id
+            name
+            rating
+            categoryID
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version
@@ -288,6 +462,23 @@ export const syncCategories = /* GraphQL */ `
       items {
         id
         name
+        Restaurants {
+          items {
+            id
+            name
+            rating
+            categoryID
+            createdAt
+            updatedAt
+            _version
+            _deleted
+            _lastChangedAt
+            __typename
+          }
+          nextToken
+          startedAt
+          __typename
+        }
         createdAt
         updatedAt
         _version

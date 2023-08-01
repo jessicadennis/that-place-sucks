@@ -7,7 +7,7 @@
 import * as React from "react";
 import { AutocompleteProps, GridProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { EscapeHatchProps } from "@aws-amplify/ui-react/internal";
-import { Restaurant, Notes as Notes0 } from "../models";
+import { Restaurant, Notes, Category } from "../models";
 export declare type ValidationResponse = {
     hasError: boolean;
     errorMessage?: string;
@@ -17,13 +17,15 @@ export declare type RestaurantUpdateFormInputValues = {
     name?: string;
     rating?: number;
     categoryID?: string;
-    Notes?: Notes0[];
+    notes?: Notes[];
+    category?: Category;
 };
 export declare type RestaurantUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
     rating?: ValidationFunction<number>;
     categoryID?: ValidationFunction<string>;
-    Notes?: ValidationFunction<Notes0>;
+    notes?: ValidationFunction<Notes>;
+    category?: ValidationFunction<Category>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type RestaurantUpdateFormOverridesProps = {
@@ -31,7 +33,8 @@ export declare type RestaurantUpdateFormOverridesProps = {
     name?: PrimitiveOverrideProps<TextFieldProps>;
     rating?: PrimitiveOverrideProps<TextFieldProps>;
     categoryID?: PrimitiveOverrideProps<AutocompleteProps>;
-    Notes?: PrimitiveOverrideProps<AutocompleteProps>;
+    notes?: PrimitiveOverrideProps<AutocompleteProps>;
+    category?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
 export declare type RestaurantUpdateFormProps = React.PropsWithChildren<{
     overrides?: RestaurantUpdateFormOverridesProps | undefined | null;

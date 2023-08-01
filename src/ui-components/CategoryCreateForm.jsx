@@ -313,6 +313,7 @@ export default function CategoryCreateForm(props) {
                 DataStore.save(
                   Restaurant.copyOf(original, (updated) => {
                     updated.categoryID = category.id;
+                    updated.category = category;
                   })
                 )
               );

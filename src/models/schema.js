@@ -120,8 +120,8 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "Notes": {
-                    "name": "Notes",
+                "notes": {
+                    "name": "notes",
                     "isArray": true,
                     "type": {
                         "model": "Notes"
@@ -133,6 +133,21 @@ export const schema = {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
                             "restaurantID"
+                        ]
+                    }
+                },
+                "category": {
+                    "name": "category",
+                    "isArray": false,
+                    "type": {
+                        "model": "Category"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "categoryRestaurantsId"
                         ]
                     }
                 },
@@ -151,6 +166,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isReadOnly": true
+                },
+                "categoryRestaurantsId": {
+                    "name": "categoryRestaurantsId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -266,5 +288,5 @@ export const schema = {
     "enums": {},
     "nonModels": {},
     "codegenVersion": "3.4.4",
-    "version": "5622ed965be1cb612c2ebee6fe7f0e18"
+    "version": "25be38b3b82a5146654ba42c9107d805"
 };

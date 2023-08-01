@@ -1,10 +1,13 @@
 import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
-export default function Table({ columns, rows }) {
+type TableProps = { columns: ColumnDef<unknown>[]; rows: unknown[] };
+
+export default function Table({ columns, rows }: TableProps) {
   const table = useReactTable({
     data: rows,
     columns,

@@ -1,6 +1,6 @@
 import { ModelInit, MutableModel, __modelMeta__, ManagedIdentifier } from "@aws-amplify/datastore";
 // @ts-ignore
-import { LazyLoading, LazyLoadingDisabled, AsyncCollection } from "@aws-amplify/datastore";
+import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@aws-amplify/datastore";
 
 
 
@@ -49,9 +49,11 @@ type EagerRestaurant = {
   readonly name: string;
   readonly rating: number;
   readonly categoryID: string;
-  readonly Notes?: (Notes | null)[] | null;
+  readonly notes?: (Notes | null)[] | null;
+  readonly category?: Category | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
+  readonly categoryRestaurantsId?: string | null;
 }
 
 type LazyRestaurant = {
@@ -63,9 +65,11 @@ type LazyRestaurant = {
   readonly name: string;
   readonly rating: number;
   readonly categoryID: string;
-  readonly Notes: AsyncCollection<Notes>;
+  readonly notes: AsyncCollection<Notes>;
+  readonly category: AsyncItem<Category | undefined>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
+  readonly categoryRestaurantsId?: string | null;
 }
 
 export declare type Restaurant = LazyLoading extends LazyLoadingDisabled ? EagerRestaurant : LazyRestaurant
