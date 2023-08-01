@@ -16,25 +16,22 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type RestaurantUpdateFormInputValues = {
     name?: string;
     rating?: number;
-    categoryID?: string;
     notes?: Notes[];
-    category?: Category;
+    categories?: Category[];
 };
 export declare type RestaurantUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
     rating?: ValidationFunction<number>;
-    categoryID?: ValidationFunction<string>;
     notes?: ValidationFunction<Notes>;
-    category?: ValidationFunction<Category>;
+    categories?: ValidationFunction<Category>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type RestaurantUpdateFormOverridesProps = {
     RestaurantUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     rating?: PrimitiveOverrideProps<TextFieldProps>;
-    categoryID?: PrimitiveOverrideProps<AutocompleteProps>;
     notes?: PrimitiveOverrideProps<AutocompleteProps>;
-    category?: PrimitiveOverrideProps<AutocompleteProps>;
+    categories?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
 export declare type RestaurantUpdateFormProps = React.PropsWithChildren<{
     overrides?: RestaurantUpdateFormOverridesProps | undefined | null;

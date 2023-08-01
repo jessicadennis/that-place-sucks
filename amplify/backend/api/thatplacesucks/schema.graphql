@@ -10,14 +10,13 @@ type Restaurant @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
   rating: Int!
-  categoryID: ID! @index(name: "byCategory")
   notes: [Notes] @hasMany(indexName: "byRestaurant", fields: ["id"])
-  category: Category @belongsTo
+  categories: [Category] @manyToMany(relationName: "RestaurantCategory")
 }
 
 type Category @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
-  Restaurants: [Restaurant] @hasMany(indexName: "byCategory", fields: ["id"])
+  restaurants: [Restaurant] @manyToMany(relationName: "RestaurantCategory")
 }
  

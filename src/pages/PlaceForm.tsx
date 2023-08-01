@@ -1,6 +1,10 @@
 import { Amplify, API } from "aws-amplify";
 import { Authenticator, WithAuthenticatorProps } from "@aws-amplify/ui-react";
-import { createRestaurant, createNotes } from "../graphql/mutations";
+import {
+  createRestaurant,
+  createNotes,
+  createRestaurantCategory,
+} from "../graphql/mutations.js";
 import { GraphQLQuery } from "@aws-amplify/api";
 import { listCategories } from "../graphql/queries";
 import {
@@ -58,7 +62,6 @@ export default function PlaceForm({ user }: WithAuthenticatorProps) {
       const input = {
         name: name.trim(),
         rating,
-        categoryID: categoryId, // dang capital D
       };
 
       await API.graphql<GraphQLQuery<CreateRestaurantMutation>>({
@@ -68,27 +71,42 @@ export default function PlaceForm({ user }: WithAuthenticatorProps) {
         .then((response) => {
           newRestaurantId = response?.data?.createRestaurant?.id;
 
-          if (note.trim().length) {
-            API.graphql<GraphQLQuery<CreateNotesMutation>>({
-              query: createNotes,
+          const promises = [
+            API.graphql<GraphQLQuery<any>>({
+              query: createRestaurantCategory,
               variables: {
                 input: {
-                  restaurantID: newRestaurantId,
-                  author: `${user?.attributes?.given_name ?? ""} ${
-                    user?.attributes?.family_name ?? ""
-                  }`,
-                  authorEmail: user?.attributes?.email ?? "unknown",
-                  note: note.trim(),
+                  restaurantId: newRestaurantId,
+                  categoryId: categoryId,
                 },
               },
-            })
-              .then(() => {
-                resetForm();
+            }),
+          ];
+
+          if (note.trim().length) {
+            promises.push(
+              API.graphql<GraphQLQuery<CreateNotesMutation>>({
+                query: createNotes,
+                variables: {
+                  input: {
+                    restaurantID: newRestaurantId,
+                    author: `${user?.attributes?.given_name ?? ""} ${
+                      user?.attributes?.family_name ?? ""
+                    }`,
+                    authorEmail: user?.attributes?.email ?? "unknown",
+                    note: note.trim(),
+                  },
+                },
               })
-              .catch((error) => console.error(error));
-          } else {
-            resetForm();
+            );
           }
+
+          Promise.all(promises)
+            .then(() => {
+              resetForm();
+            })
+            .then(() => resetForm())
+            .catch((error) => console.error(error));
         })
         .catch((error) => {
           console.error(error);

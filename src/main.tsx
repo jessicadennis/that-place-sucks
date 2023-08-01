@@ -10,9 +10,8 @@ import Home from "./pages/Home.tsx";
 import PlaceForm from "./pages/PlaceForm.tsx";
 import ReactDOM from "react-dom/client";
 
-import "bootstrap/dist/js/bootstrap.bundle.min";
-
-import "./assets/scss/bootstrap.scss";
+import "bootstrap/dist/js/bootstrap.bundle.js";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(awsExports);

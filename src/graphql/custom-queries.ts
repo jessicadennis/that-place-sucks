@@ -1,28 +1,31 @@
-export const listRestaurantsWithNotes = `
-  query listRestaurantsWithNotes {
-    listRestaurants(limit: 10, filter: {_deleted: {ne: true}}) {
-      nextToken
-      startedAt
+export const getAllRestaurants = `
+  query getAllRestaurants {
+    listRestaurants(filter: {_deleted: {ne: true}}) {
       items {
-        categoryID
+        categories {
+          items {
+            category {
+              id
+              name
+            }
+          }
+        }
         id
         name
-        rating
-        updatedAt
-        Notes {
+        notes {
           items {
-            id
             author
             authorEmail
+            id
             note
-            restaurantID
             updatedAt
           }
         }
+        rating
+        updatedAt
       }
     }
-  }
-`;
+  }`;
 
 export const listValidCategories = `
   query listValidCategories {

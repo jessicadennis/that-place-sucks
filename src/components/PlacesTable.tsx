@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Amplify, API } from "aws-amplify";
-import { createColumnHelper } from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { getAllRestaurants } from "../graphql/custom-queries";
 import { GraphQLResult } from "@aws-amplify/api-graphql";
-import { listRestaurants } from "../graphql/queries";
-import { ListRestaurantsQuery } from "../API";
 import { useQuery } from "react-query";
 import awsconfig from "../aws-exports";
 import Table from "./Table";
@@ -11,6 +10,7 @@ import Table from "./Table";
 interface RestaurantRow {
   name: string;
   rating: number;
+  category: string;
   updatedAt: string;
   noteCount: number;
 }
@@ -27,6 +27,10 @@ const columns = [
   columnHelper.accessor("rating", {
     cell: (info) => info.getValue(),
     header: "Rating",
+  }),
+  columnHelper.accessor("category", {
+    cell: (info) => info.getValue(),
+    header: "Category",
   }),
   columnHelper.accessor("updatedAt", {
     cell: (info) => info.getValue(),
@@ -49,8 +53,8 @@ function formatDate(dateString: string) {
 }
 
 async function getRestaurants() {
-  const resp = (await API.graphql<ListRestaurantsQuery>({
-    query: listRestaurants,
+  const resp = (await API.graphql<any>({
+    query: getAllRestaurants,
     variables: { limit: 10 },
   })) as GraphQLResult<any>;
 
@@ -62,6 +66,7 @@ async function getRestaurants() {
   const places = result.map((place: any) => ({
     name: place.name,
     rating: place.rating,
+    category: place.categories?.items[0]?.category?.name,
     noteCount: place.notes?.items?.length,
     notes: place.notes?.items ?? [],
     updatedAt: formatDate(place?.updatedAt ?? ""),
@@ -82,7 +87,7 @@ export default function PlacesTable() {
 
   return (
     <Table
-      columns={columns}
+      columns={columns as ColumnDef<unknown>[]}
       rows={query?.data?.rows ?? []}
     />
   );

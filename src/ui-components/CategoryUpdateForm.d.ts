@@ -15,17 +15,17 @@ export declare type ValidationResponse = {
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type CategoryUpdateFormInputValues = {
     name?: string;
-    Restaurants?: Restaurant[];
+    restaurants?: Restaurant[];
 };
 export declare type CategoryUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
-    Restaurants?: ValidationFunction<Restaurant>;
+    restaurants?: ValidationFunction<Restaurant>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type CategoryUpdateFormOverridesProps = {
     CategoryUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
-    Restaurants?: PrimitiveOverrideProps<AutocompleteProps>;
+    restaurants?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
 export declare type CategoryUpdateFormProps = React.PropsWithChildren<{
     overrides?: CategoryUpdateFormOverridesProps | undefined | null;
