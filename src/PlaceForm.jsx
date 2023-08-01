@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 import { Amplify, API } from "aws-amplify";
 import awsconfig from "./aws-exports";
-import {
-  createRestaurant,
-  createRestaurantCategory,
-} from "./graphql/mutations";
+import { createRestaurant, createNotes } from "./graphql/mutations";
 import { listCategories } from "./graphql/queries";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 
-export default function PlaceForm() {
+function PlaceForm({ user }) {
   const [name, setName] = useState("");
   const [rating, setRating] = useState();
   const [note, setNote] = useState("");
-  const [category, setCategory] = useState();
+  const [categoryId, setCategoryId] = useState();
   const [categories, setCategories] = useState([]);
 
   const title = "Add a Place";
@@ -44,31 +42,58 @@ export default function PlaceForm() {
       nameField.setCustomValidity("all-spaces name");
     }
 
+    let newRestaurantId;
+
     if (form.checkValidity()) {
+      form.classList.add("was-validated");
       const input = {
         name: name.trim(),
         rating,
-        categoryId: category.id,
-        notes: note.trim().length ? [note.trim()] : [],
+        categoryID: categoryId, // dang capital D
       };
 
-      // TODO: First check if restaurant already exists
       await API.graphql({
         query: createRestaurant,
         variables: { input },
       })
         .then((response) => {
-          setName("");
-          setRating(null);
-          setCategory(null);
-          setNote("");
+          newRestaurantId = response?.data?.createRestaurant?.id;
+
+          if (note.trim().length) {
+            API.graphql({
+              query: createNotes,
+              variables: {
+                input: {
+                  restaurantID: newRestaurantId,
+                  author: `${user.attributes.given_name} ${user.attributes.family_name}`,
+                  authorEmail: user.attributes.email,
+                  note: note.trim(),
+                },
+              },
+            })
+              .then((response) => {
+                resetForm();
+              })
+              .catch((error) => console.error(error));
+          } else {
+            resetForm();
+          }
         })
         .catch((error) => {
           console.error(error);
         });
+    } else {
+      form.classList.add("was-validated");
     }
+  }
 
-    form.classList.add("was-validated");
+  function resetForm() {
+    setName("");
+    setRating(undefined);
+    setCategoryId(undefined);
+    setNote("");
+    const form = document.getElementById("place-form");
+    form.classList.remove("was-validated");
   }
 
   return (
@@ -108,7 +133,7 @@ export default function PlaceForm() {
               <select
                 id="category"
                 className="form-select"
-                onChange={(e) => setCategory(e.target.value)}>
+                onChange={(e) => setCategoryId(e.target.value)}>
                 <option></option>
                 {categories.map((cat) => (
                   <option
@@ -174,3 +199,5 @@ export default function PlaceForm() {
     </>
   );
 }
+
+export default withAuthenticator(PlaceForm);

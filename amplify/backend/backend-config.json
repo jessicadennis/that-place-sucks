@@ -21,5 +21,39 @@
       "providerPlugin": "awscloudformation",
       "service": "AppSync"
     }
+  },
+  "auth": {
+    "thatplacesucks": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [
+            "REQUIRES_LOWERCASE",
+            "REQUIRES_NUMBERS",
+            "REQUIRES_UPPERCASE"
+          ],
+          "passwordPolicyMinLength": 16
+        },
+        "signupAttributes": [
+          "EMAIL",
+          "GIVEN_NAME",
+          "FAMILY_NAME"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
   }
 }

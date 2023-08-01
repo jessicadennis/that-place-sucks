@@ -1,8 +1,10 @@
 import "./App.css";
 import NavBar from "./components/NavBar.js";
 import { Outlet } from "react-router-dom";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
 
-export default function App() {
+function App() {
   return (
     <main>
       <NavBar />
@@ -12,3 +14,5 @@ export default function App() {
     </main>
   );
 }
+
+export default withAuthenticator(App);
