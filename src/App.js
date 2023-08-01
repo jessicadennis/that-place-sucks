@@ -1,5 +1,5 @@
 import "./App.css";
-import NavBar from "./components/NavBar.js";
+import NavBar from "./components/NavBar.jsx";
 import { Outlet } from "react-router-dom";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
