@@ -1,11 +1,14 @@
 import "./index.css";
 import App from "./App";
 import ErrorPage from "./error-page";
+import Home from "./Home";
+import PlaceForm from "./PlaceForm";
 import ReactDOM from "react-dom/client";
 import awsExports from "./aws-exports";
 import reportWebVitals from "./reportWebVitals";
 import { Amplify } from "aws-amplify";
 import { AmplifyProvider } from "@aws-amplify/ui-react";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { React, StrictMode } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -16,10 +19,10 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 // FontAwesome
 import "@fortawesome/fontawesome-free/css/fontawesome.css";
 import "@fortawesome/fontawesome-free/css/solid.css";
-import PlaceForm from "./PlaceForm";
-import PlaceList from "./components/PlaceList";
 
 Amplify.configure(awsExports);
+
+const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
@@ -29,7 +32,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PlaceList />,
+        element: <Home />,
       },
       {
         path: "add",
@@ -37,7 +40,7 @@ const router = createBrowserRouter([
       },
       {
         path: "login",
-        element: <PlaceList />,
+        element: <Home />,
       },
     ],
   },
@@ -48,9 +51,11 @@ document.querySelector("html").setAttribute("data-bs-theme", "dark");
 
 root.render(
   <StrictMode>
-    <AmplifyProvider>
-      <RouterProvider router={router} />
-    </AmplifyProvider>
+    <QueryClientProvider client={queryClient}>
+      <AmplifyProvider>
+        <RouterProvider router={router} />
+      </AmplifyProvider>
+    </QueryClientProvider>
   </StrictMode>
 );
 

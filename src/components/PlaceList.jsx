@@ -15,6 +15,7 @@ export default function PlaceList() {
     })
       .then((resp) => {
         const restaurants = resp?.data?.listRestaurants?.items ?? [];
+        console.log(restaurants);
         setPlaces(restaurants);
       })
       .catch((error) => console.error(error));
