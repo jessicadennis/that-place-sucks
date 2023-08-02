@@ -1,10 +1,8 @@
-import { Amplify } from "aws-amplify";
 import { AmplifyProvider } from "@aws-amplify/ui-react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { StrictMode } from "react";
 import App from "./App.tsx";
-import awsExports from "./aws-exports";
 import ErrorPage from "./components/error-page.jsx";
 import Home from "./pages/Home.tsx";
 import PlaceForm from "./pages/PlaceForm.tsx";
@@ -13,8 +11,7 @@ import ReactDOM from "react-dom/client";
 import "bootstrap/dist/js/bootstrap.bundle.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@aws-amplify/ui-react/styles.css";
-
-Amplify.configure(awsExports);
+import "./index.css";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +27,10 @@ const router = createBrowserRouter([
       },
       {
         path: "add",
+        element: <PlaceForm />,
+      },
+      {
+        path: "edit/:restaurantId",
         element: <PlaceForm />,
       },
       {

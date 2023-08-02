@@ -22,3 +22,7 @@ code {
 #root main {
   height: 100%;
 }
+
+table.table tbody tr td {
+  vertical-align: middle;
+}

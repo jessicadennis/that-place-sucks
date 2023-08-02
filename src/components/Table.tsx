@@ -1,20 +1,38 @@
 import {
   ColumnDef,
+  ExpandedState,
+  Row,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useState, ReactElement, Fragment } from "react";
 
-type TableProps = { columns: ColumnDef<unknown>[]; rows: unknown[] };
+type TableProps<TData> = {
+  columns: ColumnDef<unknown>[];
+  rows: unknown[];
+  renderSubComponent: (props: { row: Row<TData> }) => ReactElement;
+  getRowCanExpand: (row: Row<TData>) => boolean;
+};
 
-export default function Table({ columns, rows }: TableProps) {
-  const table = useReactTable({
+export default function Table({
+  columns,
+  rows,
+  renderSubComponent,
+  getRowCanExpand,
+}: TableProps<any>) {
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  const table = useReactTable<any>({
     data: rows,
     columns,
-    getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     debugTable: true,
+    getRowCanExpand,
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
   });
 
   return (
@@ -38,13 +56,22 @@ export default function Table({ columns, rows }: TableProps) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
+            <Fragment key={row.id}>
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+              {row.getIsExpanded() && (
+                <tr>
+                  <td colSpan={row.getVisibleCells().length}>
+                    {renderSubComponent({ row })}
+                  </td>
+                </tr>
+              )}
+            </Fragment>
           ))}
         </tbody>
       </table>

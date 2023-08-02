@@ -29,12 +29,35 @@ export const getAllRestaurants = `
 
 export const listValidCategories = `
   query listValidCategories {
-    listCategories(filter: {_deleted: {ne: true}}) {
-      nextToken
+    listCategories(limit: 1000, filter: {_deleted: {ne: true}}) {
       items {
         name
         id
         updatedAt
+      }
+    }
+  }
+`;
+
+export const getRestaurantById = `
+  query GetRestaurantById($id: ID!) {
+    getRestaurant(id: $id) {
+      categories {
+        items {
+          categoryId
+        }
+      }
+      id
+      name
+      rating
+      updatedAt
+      notes {
+        items {
+          author
+          id
+          note
+          updatedAt
+        }
       }
     }
   }
