@@ -12,6 +12,7 @@ import "bootstrap/dist/js/bootstrap.bundle.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@aws-amplify/ui-react/styles.css";
 import "./index.css";
+import ClearAll from "./pages/Clear.tsx";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Home />,
+      },
+      {
+        path: "kill-all",
+        element: <ClearAll />,
       },
     ],
   },

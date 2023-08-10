@@ -8,28 +8,32 @@ import {
   createRestaurant,
   createNotes,
   createRestaurantCategory,
+  updateRestaurant,
+  updateRestaurantCategory,
 } from "../graphql/mutations.js";
 import { GraphQLQuery } from "@aws-amplify/api";
-import { getRestaurant, listCategories } from "../graphql/queries";
 import {
   CreateNotesMutation,
   CreateRestaurantMutation,
-  GetRestaurantQuery,
   ListCategoriesQuery,
+  UpdateRestaurantMutation,
 } from "../API";
 import { FormEvent, useEffect, useState } from "react";
 import awsconfig from "../aws-exports";
-import { Category, Notes } from "../models";
-import { useParams } from "react-router-dom";
+import { Category, Notes, RestaurantCategory } from "../models";
+import { useNavigate, useParams } from "react-router-dom";
+import { getRestaurantById } from "../graphql/custom-queries.js";
 import {
-  getRestaurantById,
-  listValidCategories,
-} from "../graphql/custom-queries.js";
-import { useQuery } from "react-query";
+  listCategories,
+  restaurantCategoriesByRestaurantId,
+} from "../graphql/queries.js";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import Modal from "../components/Modal.js";
+import CategoryForm from "./CategoryForm.js";
 
 async function getCategories() {
   const result = await API.graphql<GraphQLQuery<ListCategoriesQuery>>({
-    query: listValidCategories,
+    query: listCategories,
   });
 
   return result.data;
@@ -54,22 +58,170 @@ function renderNotes(notes: Notes[]) {
   return <></>;
 }
 
+type RestauarntMutationInput = {
+  restaurantId?: string;
+  name: string;
+  rating: number;
+  categoryId: string;
+  note: string;
+  userName: string;
+  userEmail: string;
+  restaurantCategoryId?: string;
+};
+
+async function addRestaurant(input: RestauarntMutationInput) {
+  const response = await API.graphql<GraphQLQuery<CreateRestaurantMutation>>({
+    query: createRestaurant,
+    variables: {
+      input: {
+        name: input.name,
+        rating: input.rating,
+      },
+    },
+  });
+
+  const newRestaurantId = response.data?.createRestaurant?.id;
+  if (!newRestaurantId) {
+    throw new Error("Failed to create restaurant");
+  }
+
+  const promises = [
+    API.graphql<GraphQLQuery<any>>({
+      query: createRestaurantCategory,
+      variables: {
+        input: {
+          restaurantId: newRestaurantId,
+          categoryId: input.categoryId,
+        },
+      },
+    }),
+  ];
+
+  if (input.note.trim().length) {
+    promises.push(
+      API.graphql<GraphQLQuery<CreateNotesMutation>>({
+        query: createNotes,
+        variables: {
+          input: {
+            restaurantID: newRestaurantId,
+            author: input.userName,
+            authorEmail: input.userEmail ?? "unknown",
+            note: input.note.trim(),
+          },
+        },
+      })
+    );
+  }
+
+  await Promise.all(promises);
+}
+
+async function editRestaurant(input: RestauarntMutationInput) {
+  await API.graphql<GraphQLQuery<UpdateRestaurantMutation>>({
+    query: updateRestaurant,
+    variables: {
+      input: {
+        name: input.name,
+        rating: input.rating,
+        id: input.restaurantId,
+      },
+    },
+  });
+
+  const promises = [
+    API.graphql<GraphQLQuery<any>>({
+      query: updateRestaurantCategory,
+      variables: {
+        input: {
+          id: input.restaurantCategoryId,
+          restaurantId: input.restaurantId,
+          categoryId: input.categoryId,
+        },
+      },
+    }),
+  ];
+
+  if (input.note.trim().length) {
+    promises.push(
+      API.graphql<GraphQLQuery<CreateNotesMutation>>({
+        query: createNotes,
+        variables: {
+          input: {
+            restaurantID: input.restaurantId,
+            author: input.userName,
+            authorEmail: input.userEmail,
+            note: input.note.trim(),
+          },
+        },
+      })
+    );
+  }
+
+  await Promise.all(promises);
+}
+
 export function PlaceForm({ user }: WithAuthenticatorProps) {
-  const [name, setName] = useState<string>("");
-  const [rating, setRating] = useState<string>();
-  const [note, setNote] = useState<string>("");
-  const [categoryId, setCategoryId] = useState<string>();
+  const [name, setName] = useState("");
+  const [rating, setRating] = useState(1);
+  const [note, setNote] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [notes, setNotes] = useState<Notes[]>();
+  const [restaurantCategoryId, setRestaurantCategoryId] = useState();
 
   const title = "Add a Place";
 
   Amplify.configure(awsconfig);
+  const { restaurantId } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const catQuery = useQuery("categories", getCategories) as any;
   const categories = catQuery?.data?.listCategories?.items ?? [];
 
-  // const { restaurantId } = useParams();
-  // console.log(restaurantId);
+  const addMutation = useMutation({
+    mutationFn: () =>
+      addRestaurant({
+        name,
+        rating,
+        note,
+        categoryId,
+        userName: `${user?.attributes?.given_name ?? ""} ${
+          user?.attributes?.family_name ?? ""
+        }`,
+        userEmail: user?.attributes?.email ?? "unknown",
+      }),
+    onSuccess: () => {
+      resetForm(), queryClient.invalidateQueries("restaurants");
+    },
+    onError: (error) => {
+      // TODO: toast or someting
+      console.error(error);
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: () =>
+      editRestaurant({
+        name,
+        rating,
+        note,
+        categoryId,
+        userName: `${user?.attributes?.given_name ?? ""} ${
+          user?.attributes?.family_name ?? ""
+        }`,
+        userEmail: user?.attributes?.email ?? "unknown",
+        restaurantId: restaurantId,
+        restaurantCategoryId: restaurantCategoryId,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries("restaurants");
+      navigate("/");
+    },
+    onError: (error) => {
+      // TODO: toast or someting
+      console.error(error);
+    },
+  });
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -83,62 +235,14 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
       nameField?.setCustomValidity("all-spaces name");
     }
 
-    let newRestaurantId;
-
     if (form.checkValidity()) {
       form.classList.add("was-validated");
-      const input = {
-        name: name.trim(),
-        rating,
-      };
 
-      await API.graphql<GraphQLQuery<CreateRestaurantMutation>>({
-        query: createRestaurant,
-        variables: { input },
-      })
-        .then((response) => {
-          newRestaurantId = response?.data?.createRestaurant?.id;
-
-          const promises = [
-            API.graphql<GraphQLQuery<any>>({
-              query: createRestaurantCategory,
-              variables: {
-                input: {
-                  restaurantId: newRestaurantId,
-                  categoryId: categoryId,
-                },
-              },
-            }),
-          ];
-
-          if (note.trim().length) {
-            promises.push(
-              API.graphql<GraphQLQuery<CreateNotesMutation>>({
-                query: createNotes,
-                variables: {
-                  input: {
-                    restaurantID: newRestaurantId,
-                    author: `${user?.attributes?.given_name ?? ""} ${
-                      user?.attributes?.family_name ?? ""
-                    }`,
-                    authorEmail: user?.attributes?.email ?? "unknown",
-                    note: note.trim(),
-                  },
-                },
-              })
-            );
-          }
-
-          Promise.all(promises)
-            .then(() => {
-              resetForm();
-            })
-            .then(() => resetForm())
-            .catch((error) => console.error(error));
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      if (restaurantId) {
+        editMutation.mutate();
+      } else {
+        addMutation.mutate();
+      }
     } else {
       form.classList.add("was-validated");
     }
@@ -146,15 +250,14 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
 
   function resetForm() {
     setName("");
-    setRating(undefined);
-    setCategoryId(undefined);
+    setRating(1);
+    setCategoryId("");
     setNote("");
     setNotes([]);
     const form = document.getElementById("place-form");
     form?.classList.remove("was-validated");
   }
 
-  const { restaurantId } = useParams();
   useEffect(() => {
     if (restaurantId) {
       API.graphql<GraphQLQuery<any>>({
@@ -165,11 +268,21 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
       })
         .then((result) => {
           const placeData = result.data?.getRestaurant;
-          console.log(placeData);
           setName(placeData?.name ?? "");
           setCategoryId(placeData?.categories?.items[0]?.categoryId);
-          setRating(`${placeData?.rating}`);
+          setRating(parseInt(placeData?.rating, 10));
           setNotes(placeData?.notes?.items ?? []);
+
+          API.graphql<GraphQLQuery<any>>({
+            query: restaurantCategoriesByRestaurantId,
+            variables: {
+              restaurantId,
+            },
+          }).then((result) => {
+            const restCat =
+              result?.data?.restaurantCategoriesByRestaurantId.items[0] ?? null;
+            setRestaurantCategoryId(restCat.id ?? null);
+          });
         })
         .catch((error) => console.error(error));
     } else {
@@ -206,25 +319,32 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
           </div>
           <div className="row mb-4">
             <div className="col-lg-8">
-              <label
-                htmlFor="category"
-                className="form-label">
-                Category
-              </label>
-              <select
-                id="category"
-                className="form-select"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}>
-                <option></option>
-                {categories.map((cat: Category) => (
-                  <option
-                    key={cat.id}
-                    value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+              <div className="d-flex align-items-end justify-content-between">
+                <div className="category-select flex-grow-1 me-3">
+                  <label
+                    htmlFor="category"
+                    className="form-label">
+                    Category
+                  </label>
+                  <select
+                    id="category"
+                    className="form-select"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}>
+                    <option></option>
+                    {categories.map((cat: Category) => (
+                      <option
+                        key={cat.id}
+                        value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="button-container mb-1">
+                  <CategoryForm existingCategories={categories} />
+                </div>
+              </div>
             </div>
             <div className="col-lg-4">
               <label
@@ -237,7 +357,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
                 id="rating"
                 required
                 value={rating}
-                onChange={(e) => setRating(e?.target?.value)}>
+                onChange={(e) => setRating(parseInt(e?.target?.value, 10))}>
                 <option></option>
                 {[...Array(10).keys()].map((key) => (
                   <option

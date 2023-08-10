@@ -1,6 +1,6 @@
 export const getAllRestaurants = `
   query getAllRestaurants {
-    listRestaurants(filter: {_deleted: {ne: true}}) {
+    listRestaurants {
       items {
         categories {
           items {
@@ -45,6 +45,9 @@ export const getRestaurantById = `
       categories {
         items {
           categoryId
+          category {
+            name
+          }
         }
       }
       id

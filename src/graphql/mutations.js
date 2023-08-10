@@ -14,9 +14,6 @@ export const createNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -34,9 +31,6 @@ export const updateNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -54,9 +48,6 @@ export const deleteNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -72,19 +63,14 @@ export const createRestaurant = /* GraphQL */ `
       rating
       notes {
         nextToken
-        startedAt
         __typename
       }
       categories {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -100,19 +86,14 @@ export const updateRestaurant = /* GraphQL */ `
       rating
       notes {
         nextToken
-        startedAt
         __typename
       }
       categories {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -128,19 +109,14 @@ export const deleteRestaurant = /* GraphQL */ `
       rating
       notes {
         nextToken
-        startedAt
         __typename
       }
       categories {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -155,14 +131,10 @@ export const createCategory = /* GraphQL */ `
       name
       restaurants {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -177,14 +149,10 @@ export const updateCategory = /* GraphQL */ `
       name
       restaurants {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -199,14 +167,10 @@ export const deleteCategory = /* GraphQL */ `
       name
       restaurants {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -226,9 +190,6 @@ export const createRestaurantCategory = /* GraphQL */ `
         rating
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       category {
@@ -236,16 +197,10 @@ export const createRestaurantCategory = /* GraphQL */ `
         name
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -265,9 +220,6 @@ export const updateRestaurantCategory = /* GraphQL */ `
         rating
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       category {
@@ -275,16 +227,10 @@ export const updateRestaurantCategory = /* GraphQL */ `
         name
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -304,9 +250,6 @@ export const deleteRestaurantCategory = /* GraphQL */ `
         rating
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       category {
@@ -314,16 +257,10 @@ export const deleteRestaurantCategory = /* GraphQL */ `
         name
         createdAt
         updatedAt
-        _version
-        _deleted
-        _lastChangedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }

@@ -29,7 +29,6 @@ export default function Table({
     data: rows,
     columns,
     getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
     getRowCanExpand,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
@@ -82,9 +81,7 @@ export default function Table({
           <li className="page-item">
             <button
               className={
-                !table.getCanPreviousPage()
-                  ? "page-link disabled"
-                  : "page-linke"
+                !table.getCanPreviousPage() ? "page-link disabled" : "page-link"
               }
               type="button"
               aria-label="First"
@@ -104,9 +101,7 @@ export default function Table({
           <li className="page-item">
             <button
               className={
-                !table.getCanPreviousPage()
-                  ? "page-link disabled"
-                  : "page-linke"
+                !table.getCanPreviousPage() ? "page-link disabled" : "page-link"
               }
               type="button"
               aria-label="Previous"
@@ -130,7 +125,7 @@ export default function Table({
           <li className="page-item">
             <button
               className={
-                !table.getCanNextPage() ? "page-link disabled" : "page-linke"
+                !table.getCanNextPage() ? "page-link disabled" : "page-link"
               }
               type="button"
               aria-label="Previous"
@@ -153,7 +148,7 @@ export default function Table({
           <li className="page-item">
             <button
               className={
-                !table.getCanNextPage() ? "page-link disabled" : "page-linke"
+                !table.getCanNextPage() ? "page-link disabled" : "page-link"
               }
               type="button"
               aria-label="First"

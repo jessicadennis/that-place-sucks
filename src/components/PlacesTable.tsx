@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Amplify, API } from "aws-amplify";
-import { ColumnDef, Row } from "@tanstack/react-table";
-import { getAllRestaurants } from "../graphql/custom-queries";
 import { GraphQLResult } from "@aws-amplify/api-graphql";
-import { useQuery } from "react-query";
-import awsconfig from "../aws-exports";
-import Table from "./Table";
-import { Link } from "react-router-dom";
+import { ColumnDef, Row } from "@tanstack/react-table";
+import { API, Amplify } from "aws-amplify";
 import { useMemo } from "react";
+import { useQuery } from "react-query";
+import { Link } from "react-router-dom";
+import awsconfig from "../aws-exports";
+import { getAllRestaurants } from "../graphql/custom-queries";
 import { Notes } from "../models";
+import Table from "./Table";
 
 interface RestaurantRow {
   name: string;
