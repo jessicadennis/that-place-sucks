@@ -113,15 +113,8 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "categoryID": {
-                    "name": "categoryID",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "Notes": {
-                    "name": "Notes",
+                "notes": {
+                    "name": "notes",
                     "isArray": true,
                     "type": {
                         "model": "Notes"
@@ -133,6 +126,22 @@ export const schema = {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
                             "restaurantID"
+                        ]
+                    }
+                },
+                "categories": {
+                    "name": "categories",
+                    "isArray": true,
+                    "type": {
+                        "model": "RestaurantCategory"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "restaurant"
                         ]
                     }
                 },
@@ -159,15 +168,6 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byCategory",
-                        "fields": [
-                            "categoryID"
-                        ]
-                    }
                 },
                 {
                     "type": "auth",
@@ -204,11 +204,11 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "Restaurants": {
-                    "name": "Restaurants",
+                "restaurants": {
+                    "name": "restaurants",
                     "isArray": true,
                     "type": {
-                        "model": "Restaurant"
+                        "model": "RestaurantCategory"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -216,7 +216,7 @@ export const schema = {
                     "association": {
                         "connectionType": "HAS_MANY",
                         "associatedWith": [
-                            "categoryID"
+                            "category"
                         ]
                     }
                 },
@@ -261,10 +261,108 @@ export const schema = {
                     }
                 }
             ]
+        },
+        "RestaurantCategory": {
+            "name": "RestaurantCategory",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "restaurantId": {
+                    "name": "restaurantId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "categoryId": {
+                    "name": "categoryId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "restaurant": {
+                    "name": "restaurant",
+                    "isArray": false,
+                    "type": {
+                        "model": "Restaurant"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "restaurantId"
+                        ]
+                    }
+                },
+                "category": {
+                    "name": "category",
+                    "isArray": false,
+                    "type": {
+                        "model": "Category"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "categoryId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "RestaurantCategories",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byRestaurant",
+                        "fields": [
+                            "restaurantId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byCategory",
+                        "fields": [
+                            "categoryId"
+                        ]
+                    }
+                }
+            ]
         }
     },
     "enums": {},
     "nonModels": {},
     "codegenVersion": "3.4.4",
-    "version": "5622ed965be1cb612c2ebee6fe7f0e18"
+    "version": "a09c4ec96def5c104c0cc0041e200251"
 };

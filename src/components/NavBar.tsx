@@ -1,7 +1,7 @@
-import { withAuthenticator } from "@aws-amplify/ui-react";
+import { WithAuthenticatorProps } from "@aws-amplify/ui-react";
 import { NavLink } from "react-router-dom";
 
-function NavBar({ signOut, user }) {
+export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
   const pages = [
     {
       name: "Home",
@@ -12,6 +12,7 @@ function NavBar({ signOut, user }) {
       route: "/add",
     },
   ];
+
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
       <div className="container">
@@ -58,13 +59,14 @@ function NavBar({ signOut, user }) {
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false">
-              {user.attributes?.given_name ?? ""}{" "}
+              {user?.attributes?.given_name ?? ""}{" "}
               {user?.attributes?.family_name ?? ""}
             </button>
             <ul className="dropdown-menu">
               <li>
                 <button
                   className="dropdown-item"
+                  type="button"
                   onClick={signOut}>
                   Log Out
                 </button>
@@ -76,5 +78,3 @@ function NavBar({ signOut, user }) {
     </nav>
   );
 }
-
-export default withAuthenticator(NavBar);

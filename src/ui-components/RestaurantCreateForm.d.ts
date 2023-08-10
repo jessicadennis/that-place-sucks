@@ -7,7 +7,7 @@
 import * as React from "react";
 import { AutocompleteProps, GridProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { EscapeHatchProps } from "@aws-amplify/ui-react/internal";
-import { Notes as Notes0 } from "../models";
+import { Notes, Category } from "../models";
 export declare type ValidationResponse = {
     hasError: boolean;
     errorMessage?: string;
@@ -16,22 +16,22 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type RestaurantCreateFormInputValues = {
     name?: string;
     rating?: number;
-    categoryID?: string;
-    Notes?: Notes0[];
+    notes?: Notes[];
+    categories?: Category[];
 };
 export declare type RestaurantCreateFormValidationValues = {
     name?: ValidationFunction<string>;
     rating?: ValidationFunction<number>;
-    categoryID?: ValidationFunction<string>;
-    Notes?: ValidationFunction<Notes0>;
+    notes?: ValidationFunction<Notes>;
+    categories?: ValidationFunction<Category>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type RestaurantCreateFormOverridesProps = {
     RestaurantCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     rating?: PrimitiveOverrideProps<TextFieldProps>;
-    categoryID?: PrimitiveOverrideProps<AutocompleteProps>;
-    Notes?: PrimitiveOverrideProps<AutocompleteProps>;
+    notes?: PrimitiveOverrideProps<AutocompleteProps>;
+    categories?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
 export declare type RestaurantCreateFormProps = React.PropsWithChildren<{
     overrides?: RestaurantCreateFormOverridesProps | undefined | null;

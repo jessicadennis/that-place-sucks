@@ -23,7 +23,7 @@ import {
   getOverrideProps,
   useDataStoreBinding,
 } from "@aws-amplify/ui-react/internal";
-import { Restaurant, Notes as Notes0, Category } from "../models";
+import { Restaurant, Notes, Category, RestaurantCategory } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
 function ArrayField({
@@ -198,59 +198,65 @@ export default function RestaurantCreateForm(props) {
   const initialValues = {
     name: "",
     rating: "",
-    categoryID: undefined,
-    Notes: [],
+    notes: [],
+    categories: [],
   };
   const [name, setName] = React.useState(initialValues.name);
   const [rating, setRating] = React.useState(initialValues.rating);
-  const [categoryID, setCategoryID] = React.useState(initialValues.categoryID);
-  const [Notes, setNotes] = React.useState(initialValues.Notes);
+  const [notes, setNotes] = React.useState(initialValues.notes);
+  const [categories, setCategories] = React.useState(initialValues.categories);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
     setRating(initialValues.rating);
-    setCategoryID(initialValues.categoryID);
-    setCurrentCategoryIDValue(undefined);
-    setCurrentCategoryIDDisplayValue("");
-    setNotes(initialValues.Notes);
+    setNotes(initialValues.notes);
     setCurrentNotesValue(undefined);
     setCurrentNotesDisplayValue("");
+    setCategories(initialValues.categories);
+    setCurrentCategoriesValue(undefined);
+    setCurrentCategoriesDisplayValue("");
     setErrors({});
   };
-  const [currentCategoryIDDisplayValue, setCurrentCategoryIDDisplayValue] =
-    React.useState("");
-  const [currentCategoryIDValue, setCurrentCategoryIDValue] =
-    React.useState(undefined);
-  const categoryIDRef = React.createRef();
   const [currentNotesDisplayValue, setCurrentNotesDisplayValue] =
     React.useState("");
   const [currentNotesValue, setCurrentNotesValue] = React.useState(undefined);
-  const NotesRef = React.createRef();
+  const notesRef = React.createRef();
+  const [currentCategoriesDisplayValue, setCurrentCategoriesDisplayValue] =
+    React.useState("");
+  const [currentCategoriesValue, setCurrentCategoriesValue] =
+    React.useState(undefined);
+  const categoriesRef = React.createRef();
   const getIDValue = {
-    Notes: (r) => JSON.stringify({ id: r?.id }),
+    notes: (r) => JSON.stringify({ id: r?.id }),
+    categories: (r) => JSON.stringify({ id: r?.id }),
   };
-  const NotesIdSet = new Set(
-    Array.isArray(Notes)
-      ? Notes.map((r) => getIDValue.Notes?.(r))
-      : getIDValue.Notes?.(Notes)
+  const notesIdSet = new Set(
+    Array.isArray(notes)
+      ? notes.map((r) => getIDValue.notes?.(r))
+      : getIDValue.notes?.(notes)
   );
+  const categoriesIdSet = new Set(
+    Array.isArray(categories)
+      ? categories.map((r) => getIDValue.categories?.(r))
+      : getIDValue.categories?.(categories)
+  );
+  const notesRecords = useDataStoreBinding({
+    type: "collection",
+    model: Notes,
+  }).items;
   const categoryRecords = useDataStoreBinding({
     type: "collection",
     model: Category,
   }).items;
-  const notesRecords = useDataStoreBinding({
-    type: "collection",
-    model: Notes0,
-  }).items;
   const getDisplayValue = {
-    categoryID: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
-    Notes: (r) => `${r?.note ? r?.note + " - " : ""}${r?.id}`,
+    notes: (r) => `${r?.note ? r?.note + " - " : ""}${r?.id}`,
+    categories: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
   const validations = {
     name: [{ type: "Required" }],
     rating: [{ type: "Required" }],
-    categoryID: [{ type: "Required" }],
-    Notes: [],
+    notes: [],
+    categories: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -280,8 +286,8 @@ export default function RestaurantCreateForm(props) {
         let modelFields = {
           name,
           rating,
-          categoryID,
-          Notes,
+          notes,
+          categories,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -322,18 +328,30 @@ export default function RestaurantCreateForm(props) {
           const modelFieldsToSave = {
             name: modelFields.name,
             rating: modelFields.rating,
-            categoryID: modelFields.categoryID,
           };
           const restaurant = await DataStore.save(
             new Restaurant(modelFieldsToSave)
           );
           const promises = [];
           promises.push(
-            ...Notes.reduce((promises, original) => {
+            ...notes.reduce((promises, original) => {
               promises.push(
                 DataStore.save(
                   Notes.copyOf(original, (updated) => {
                     updated.restaurantID = restaurant.id;
+                  })
+                )
+              );
+              return promises;
+            }, [])
+          );
+          promises.push(
+            ...categories.reduce((promises, category) => {
+              promises.push(
+                DataStore.save(
+                  new RestaurantCategory({
+                    restaurant,
+                    category,
                   })
                 )
               );
@@ -367,8 +385,8 @@ export default function RestaurantCreateForm(props) {
             const modelFields = {
               name: value,
               rating,
-              categoryID,
-              Notes,
+              notes,
+              categories,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -398,8 +416,8 @@ export default function RestaurantCreateForm(props) {
             const modelFields = {
               name,
               rating: value,
-              categoryID,
-              Notes,
+              notes,
+              categories,
             };
             const result = onChange(modelFields);
             value = result?.rating ?? value;
@@ -415,100 +433,17 @@ export default function RestaurantCreateForm(props) {
         {...getOverrideProps(overrides, "rating")}
       ></TextField>
       <ArrayField
-        lengthLimit={1}
-        onChange={async (items) => {
-          let value = items[0];
-          if (onChange) {
-            const modelFields = {
-              name,
-              rating,
-              categoryID: value,
-              Notes,
-            };
-            const result = onChange(modelFields);
-            value = result?.categoryID ?? value;
-          }
-          setCategoryID(value);
-          setCurrentCategoryIDValue(undefined);
-        }}
-        currentFieldValue={currentCategoryIDValue}
-        label={"Category id"}
-        items={categoryID ? [categoryID] : []}
-        hasError={errors?.categoryID?.hasError}
-        errorMessage={errors?.categoryID?.errorMessage}
-        getBadgeText={(value) =>
-          value
-            ? getDisplayValue.categoryID(
-                categoryRecords.find((r) => r.id === value)
-              )
-            : ""
-        }
-        setFieldValue={(value) => {
-          setCurrentCategoryIDDisplayValue(
-            value
-              ? getDisplayValue.categoryID(
-                  categoryRecords.find((r) => r.id === value)
-                )
-              : ""
-          );
-          setCurrentCategoryIDValue(value);
-        }}
-        inputFieldRef={categoryIDRef}
-        defaultFieldValue={""}
-      >
-        <Autocomplete
-          label="Category id"
-          isRequired={true}
-          isReadOnly={false}
-          placeholder="Search Category"
-          value={currentCategoryIDDisplayValue}
-          options={categoryRecords
-            .filter(
-              (r, i, arr) =>
-                arr.findIndex((member) => member?.id === r?.id) === i
-            )
-            .map((r) => ({
-              id: r?.id,
-              label: getDisplayValue.categoryID?.(r),
-            }))}
-          onSelect={({ id, label }) => {
-            setCurrentCategoryIDValue(id);
-            setCurrentCategoryIDDisplayValue(label);
-            runValidationTasks("categoryID", label);
-          }}
-          onClear={() => {
-            setCurrentCategoryIDDisplayValue("");
-          }}
-          onChange={(e) => {
-            let { value } = e.target;
-            if (errors.categoryID?.hasError) {
-              runValidationTasks("categoryID", value);
-            }
-            setCurrentCategoryIDDisplayValue(value);
-            setCurrentCategoryIDValue(undefined);
-          }}
-          onBlur={() =>
-            runValidationTasks("categoryID", currentCategoryIDValue)
-          }
-          errorMessage={errors.categoryID?.errorMessage}
-          hasError={errors.categoryID?.hasError}
-          ref={categoryIDRef}
-          labelHidden={true}
-          {...getOverrideProps(overrides, "categoryID")}
-        ></Autocomplete>
-      </ArrayField>
-      <ArrayField
         onChange={async (items) => {
           let values = items;
           if (onChange) {
             const modelFields = {
               name,
               rating,
-              categoryID,
-              Notes: values,
+              notes: values,
+              categories,
             };
             const result = onChange(modelFields);
-            values = result?.Notes ?? values;
+            values = result?.notes ?? values;
           }
           setNotes(values);
           setCurrentNotesValue(undefined);
@@ -516,17 +451,17 @@ export default function RestaurantCreateForm(props) {
         }}
         currentFieldValue={currentNotesValue}
         label={"Notes"}
-        items={Notes}
-        hasError={errors?.Notes?.hasError}
-        errorMessage={errors?.Notes?.errorMessage}
-        getBadgeText={getDisplayValue.Notes}
+        items={notes}
+        hasError={errors?.notes?.hasError}
+        errorMessage={errors?.notes?.errorMessage}
+        getBadgeText={getDisplayValue.notes}
         setFieldValue={(model) => {
           setCurrentNotesDisplayValue(
-            model ? getDisplayValue.Notes(model) : ""
+            model ? getDisplayValue.notes(model) : ""
           );
           setCurrentNotesValue(model);
         }}
-        inputFieldRef={NotesRef}
+        inputFieldRef={notesRef}
         defaultFieldValue={""}
       >
         <Autocomplete
@@ -536,10 +471,10 @@ export default function RestaurantCreateForm(props) {
           placeholder="Search Notes"
           value={currentNotesDisplayValue}
           options={notesRecords
-            .filter((r) => !NotesIdSet.has(getIDValue.Notes?.(r)))
+            .filter((r) => !notesIdSet.has(getIDValue.notes?.(r)))
             .map((r) => ({
-              id: getIDValue.Notes?.(r),
-              label: getDisplayValue.Notes?.(r),
+              id: getIDValue.notes?.(r),
+              label: getDisplayValue.notes?.(r),
             }))}
           onSelect={({ id, label }) => {
             setCurrentNotesValue(
@@ -550,25 +485,101 @@ export default function RestaurantCreateForm(props) {
               )
             );
             setCurrentNotesDisplayValue(label);
-            runValidationTasks("Notes", label);
+            runValidationTasks("notes", label);
           }}
           onClear={() => {
             setCurrentNotesDisplayValue("");
           }}
           onChange={(e) => {
             let { value } = e.target;
-            if (errors.Notes?.hasError) {
-              runValidationTasks("Notes", value);
+            if (errors.notes?.hasError) {
+              runValidationTasks("notes", value);
             }
             setCurrentNotesDisplayValue(value);
             setCurrentNotesValue(undefined);
           }}
-          onBlur={() => runValidationTasks("Notes", currentNotesDisplayValue)}
-          errorMessage={errors.Notes?.errorMessage}
-          hasError={errors.Notes?.hasError}
-          ref={NotesRef}
+          onBlur={() => runValidationTasks("notes", currentNotesDisplayValue)}
+          errorMessage={errors.notes?.errorMessage}
+          hasError={errors.notes?.hasError}
+          ref={notesRef}
           labelHidden={true}
-          {...getOverrideProps(overrides, "Notes")}
+          {...getOverrideProps(overrides, "notes")}
+        ></Autocomplete>
+      </ArrayField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              name,
+              rating,
+              notes,
+              categories: values,
+            };
+            const result = onChange(modelFields);
+            values = result?.categories ?? values;
+          }
+          setCategories(values);
+          setCurrentCategoriesValue(undefined);
+          setCurrentCategoriesDisplayValue("");
+        }}
+        currentFieldValue={currentCategoriesValue}
+        label={"Categories"}
+        items={categories}
+        hasError={errors?.categories?.hasError}
+        errorMessage={errors?.categories?.errorMessage}
+        getBadgeText={getDisplayValue.categories}
+        setFieldValue={(model) => {
+          setCurrentCategoriesDisplayValue(
+            model ? getDisplayValue.categories(model) : ""
+          );
+          setCurrentCategoriesValue(model);
+        }}
+        inputFieldRef={categoriesRef}
+        defaultFieldValue={""}
+      >
+        <Autocomplete
+          label="Categories"
+          isRequired={false}
+          isReadOnly={false}
+          placeholder="Search Category"
+          value={currentCategoriesDisplayValue}
+          options={categoryRecords
+            .filter((r) => !categoriesIdSet.has(getIDValue.categories?.(r)))
+            .map((r) => ({
+              id: getIDValue.categories?.(r),
+              label: getDisplayValue.categories?.(r),
+            }))}
+          onSelect={({ id, label }) => {
+            setCurrentCategoriesValue(
+              categoryRecords.find((r) =>
+                Object.entries(JSON.parse(id)).every(
+                  ([key, value]) => r[key] === value
+                )
+              )
+            );
+            setCurrentCategoriesDisplayValue(label);
+            runValidationTasks("categories", label);
+          }}
+          onClear={() => {
+            setCurrentCategoriesDisplayValue("");
+          }}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.categories?.hasError) {
+              runValidationTasks("categories", value);
+            }
+            setCurrentCategoriesDisplayValue(value);
+            setCurrentCategoriesValue(undefined);
+          }}
+          onBlur={() =>
+            runValidationTasks("categories", currentCategoriesDisplayValue)
+          }
+          errorMessage={errors.categories?.errorMessage}
+          hasError={errors.categories?.hasError}
+          ref={categoriesRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "categories")}
         ></Autocomplete>
       </ArrayField>
       <Flex

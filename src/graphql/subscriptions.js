@@ -11,9 +11,6 @@ export const onCreateNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -28,9 +25,6 @@ export const onUpdateNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -45,9 +39,6 @@ export const onDeleteNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -60,17 +51,16 @@ export const onCreateRestaurant = /* GraphQL */ `
       id
       name
       rating
-      categoryID
-      Notes {
+      notes {
         nextToken
-        startedAt
+        __typename
+      }
+      categories {
+        nextToken
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -83,17 +73,16 @@ export const onUpdateRestaurant = /* GraphQL */ `
       id
       name
       rating
-      categoryID
-      Notes {
+      notes {
         nextToken
-        startedAt
+        __typename
+      }
+      categories {
+        nextToken
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -106,17 +95,16 @@ export const onDeleteRestaurant = /* GraphQL */ `
       id
       name
       rating
-      categoryID
-      Notes {
+      notes {
         nextToken
-        startedAt
+        __typename
+      }
+      categories {
+        nextToken
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -126,16 +114,12 @@ export const onCreateCategory = /* GraphQL */ `
     onCreateCategory(filter: $filter) {
       id
       name
-      Restaurants {
+      restaurants {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -145,16 +129,12 @@ export const onUpdateCategory = /* GraphQL */ `
     onUpdateCategory(filter: $filter) {
       id
       name
-      Restaurants {
+      restaurants {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
       __typename
     }
   }
@@ -164,16 +144,99 @@ export const onDeleteCategory = /* GraphQL */ `
     onDeleteCategory(filter: $filter) {
       id
       name
-      Restaurants {
+      restaurants {
         nextToken
-        startedAt
         __typename
       }
       createdAt
       updatedAt
-      _version
-      _deleted
-      _lastChangedAt
+      __typename
+    }
+  }
+`;
+export const onCreateRestaurantCategory = /* GraphQL */ `
+  subscription OnCreateRestaurantCategory(
+    $filter: ModelSubscriptionRestaurantCategoryFilterInput
+  ) {
+    onCreateRestaurantCategory(filter: $filter) {
+      id
+      restaurantId
+      categoryId
+      restaurant {
+        id
+        name
+        rating
+        createdAt
+        updatedAt
+        __typename
+      }
+      category {
+        id
+        name
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateRestaurantCategory = /* GraphQL */ `
+  subscription OnUpdateRestaurantCategory(
+    $filter: ModelSubscriptionRestaurantCategoryFilterInput
+  ) {
+    onUpdateRestaurantCategory(filter: $filter) {
+      id
+      restaurantId
+      categoryId
+      restaurant {
+        id
+        name
+        rating
+        createdAt
+        updatedAt
+        __typename
+      }
+      category {
+        id
+        name
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteRestaurantCategory = /* GraphQL */ `
+  subscription OnDeleteRestaurantCategory(
+    $filter: ModelSubscriptionRestaurantCategoryFilterInput
+  ) {
+    onDeleteRestaurantCategory(filter: $filter) {
+      id
+      restaurantId
+      categoryId
+      restaurant {
+        id
+        name
+        rating
+        createdAt
+        updatedAt
+        __typename
+      }
+      category {
+        id
+        name
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
       __typename
     }
   }
