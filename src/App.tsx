@@ -4,7 +4,7 @@ import NavBar from "./components/NavBar";
 
 function App() {
   return (
-    <Authenticator>
+    <Authenticator hideSignUp>
       {({ signOut, user }) => (
         <main>
           <NavBar

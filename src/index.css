@@ -21,6 +21,7 @@ code {
 
 #root main {
   height: 100%;
+  padding-top: 56px; /* leave space for navbar */
 }
 
 table.table tbody tr td {
@@ -33,4 +34,11 @@ table.table tbody tr td {
 
 .modal .modal-dialog {
   box-shadow: none;
+}
+
+[data-amplify-authenticator] {
+  align-items: center;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
 }
