@@ -1,8 +1,10 @@
 # That Place Sucks
 
-A React learning project with an AWS Amplify backend, using GraphQL endpoints for CRUD operations. Powered by Amplify, Vite, React, and Bootstrap. And other libraries here and there.
+A React learning project with an AWS Amplify backend, using GraphQL endpoints for CRUD operations. Powered by Amplify, Vite, React, and Bootstrap. And other libraries here and there. **Very much still under development!**
 
-The purpose is to keep track of restaurants that I've been to, how I rate them on a scale of 1 – 10, and any notes about the experience. Coming soon: tracking and rating individual dishes.
+The purpose is to keep track of restaurants that I've been to, how I rate them on a scale of 1 – 10, and any notes about the experience.
+
+Coming soon: tracking and rating individual dishes.
 
 ## Build
 
