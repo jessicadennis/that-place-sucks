@@ -1,10 +1,10 @@
-type ModalProps = {
+export interface ModalProps {
   children: any;
   headerText: string;
   buttonClass: string;
   buttonLabel: string;
   onSubmit: (args: any) => void;
-};
+}
 
 export default function Modal({
   children,

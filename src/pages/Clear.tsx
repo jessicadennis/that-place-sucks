@@ -51,6 +51,8 @@ async function getRestaurantCategories() {
   const result = await API.graphql<GraphQLQuery<any>>({
     query: listRestaurantCategories,
   });
+
+  return result.data;
 }
 
 async function getNotes() {
@@ -157,7 +159,7 @@ export default function ClearAll() {
 
   const deleteRestCat = useMutation({
     mutationFn: (id: string) => deleteARestaurantCategory(id),
-    onSuccess: (id) => {
+    onSuccess: () => {
       console.log(`Deleted a RestaurantCategory`);
     },
     onError: (error) => {
@@ -201,6 +203,13 @@ export default function ClearAll() {
         deleteNote.mutate(id);
       });
     }
+
+    queryClient.invalidateQueries([
+      "restaurants",
+      "categories",
+      "restCats",
+      "notes",
+    ]);
   }
 
   return (
