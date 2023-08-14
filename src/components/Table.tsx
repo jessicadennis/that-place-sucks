@@ -1,6 +1,5 @@
 import {
   ColumnDef,
-  ExpandedState,
   Row,
   flexRender,
   getCoreRowModel,
@@ -8,7 +7,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState, ReactElement, Fragment } from "react";
+import { ReactElement, Fragment } from "react";
 
 type TableProps<TData> = {
   columns: ColumnDef<unknown>[];
@@ -23,8 +22,6 @@ export default function Table({
   renderSubComponent,
   getRowCanExpand,
 }: TableProps<any>) {
-  const [expanded, setExpanded] = useState<ExpandedState>({});
-
   const table = useReactTable<any>({
     data: rows,
     columns,

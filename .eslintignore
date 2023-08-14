@@ -1,2 +1,7 @@
 src/models
+src/ui-components
+src/API.ts
+src/graphql
+src/aws-exports.js
 amplify-codegen-temp/models
+amplify/backend
