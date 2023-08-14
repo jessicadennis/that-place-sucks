@@ -1,12 +1,6 @@
-import { Amplify, API } from "aws-amplify";
-import awsconfig from "../aws-exports";
-import {
-  listCategories,
-  listNotes,
-  listRestaurantCategories,
-  listRestaurants,
-} from "../graphql/queries.js";
 import { GraphQLQuery } from "@aws-amplify/api";
+import { Amplify, API } from "aws-amplify";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   DeleteCategoryMutation,
   DeleteNotesMutation,
@@ -15,19 +9,27 @@ import {
   ListNotesQuery,
   ListRestaurantsQuery,
 } from "../API";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import awsconfig from "../aws-exports";
+import {
+  deleteRestaurantCategory,
+  listRestaurantCategories,
+} from "../graphql/custom-queries.js";
+import {
+  deleteCategory,
+  deleteNotes,
+  deleteRestaurant,
+} from "../graphql/mutations.js";
+import {
+  listCategories,
+  listNotes,
+  listRestaurants,
+} from "../graphql/queries.js";
 import {
   Category,
   Notes,
   Restaurant,
   RestaurantCategory,
 } from "../models/index.js";
-import {
-  deleteCategory,
-  deleteNotes,
-  deleteRestaurant,
-  deleteRestaurantCategory,
-} from "../graphql/mutations.js";
 
 async function getCategories() {
   const result = await API.graphql<GraphQLQuery<ListCategoriesQuery>>({

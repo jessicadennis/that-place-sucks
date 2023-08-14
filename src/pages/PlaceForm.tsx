@@ -1,34 +1,32 @@
-import { Amplify, API } from "aws-amplify";
+import { GraphQLQuery } from "@aws-amplify/api";
 import {
-  Authenticator,
   withAuthenticator,
   WithAuthenticatorProps,
 } from "@aws-amplify/ui-react";
-import {
-  createRestaurant,
-  createNotes,
-  createRestaurantCategory,
-  updateRestaurant,
-  updateRestaurantCategory,
-} from "../graphql/mutations.js";
-import { GraphQLQuery } from "@aws-amplify/api";
+import { Amplify, API } from "aws-amplify";
+import { FormEvent, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   CreateNotesMutation,
   CreateRestaurantMutation,
   ListCategoriesQuery,
   UpdateRestaurantMutation,
 } from "../API";
-import { FormEvent, useEffect, useState } from "react";
 import awsconfig from "../aws-exports";
-import { Category, Notes, RestaurantCategory } from "../models";
-import { useNavigate, useParams } from "react-router-dom";
-import { getRestaurantById } from "../graphql/custom-queries.js";
 import {
-  listCategories,
+  createRestaurantCategory,
+  getRestaurantById,
   restaurantCategoriesByRestaurantId,
-} from "../graphql/queries.js";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import Modal from "../components/Modal.js";
+  updateRestaurantCategory,
+} from "../graphql/custom-queries.js";
+import {
+  createNotes,
+  createRestaurant,
+  updateRestaurant,
+} from "../graphql/mutations.js";
+import { listCategories } from "../graphql/queries.js";
+import { Category, Notes } from "../models";
 import CategoryForm from "./CategoryForm.js";
 
 async function getCategories() {
