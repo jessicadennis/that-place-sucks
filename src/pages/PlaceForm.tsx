@@ -14,18 +14,16 @@ import {
   UpdateRestaurantMutation,
 } from "../API";
 import awsconfig from "../aws-exports";
-import {
-  createRestaurantCategory,
-  getRestaurantById,
-  restaurantCategoriesByRestaurantId,
-  updateRestaurantCategory,
-} from "../graphql/custom-queries.js";
+import { getRestaurantById } from "../graphql/custom-queries.js";
 import {
   createNotes,
   createRestaurant,
+  createRestaurantCategory,
   updateRestaurant,
-} from "../graphql/mutations.js";
+  updateRestaurantCategory,
+} from "../graphql/mutations.ts";
 import { listCategories } from "../graphql/queries.js";
+import { restaurantCategoriesByRestaurantId } from "../graphql/queries.ts";
 import { Category, Notes } from "../models";
 import CategoryForm from "./CategoryForm.js";
 
@@ -328,6 +326,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
                     id="category"
                     className="form-select"
                     value={categoryId}
+                    required
                     onChange={(e) => setCategoryId(e.target.value)}>
                     <option></option>
                     {categories.map((cat: Category) => (

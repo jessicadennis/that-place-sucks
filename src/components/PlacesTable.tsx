@@ -2,13 +2,18 @@
 import { GraphQLResult } from "@aws-amplify/api-graphql";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { API, Amplify } from "aws-amplify";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "react-query";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import awsconfig from "../aws-exports";
-import { getAllRestaurants } from "../graphql/custom-queries";
+// import { searchRestaurants } from "../graphql/queries";
 import { Notes } from "../models";
 import Table from "./Table";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPizzaSlice, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { getAllRestaurants } from "../graphql/custom-queries";
+import SpinnerOverlay from "./SpinnerOverlay";
 
 interface RestaurantRow {
   name: string;
@@ -32,29 +37,42 @@ function formatDate(dateString: string) {
   }
 }
 
-async function getRestaurants() {
-  const resp = (await API.graphql<any>({
-    query: getAllRestaurants,
-  })) as GraphQLResult<any>;
-
-  const result = resp?.data?.listRestaurants?.items ?? [];
-  const places: RestaurantRow[] = result.map((place: any) => ({
-    name: place.name,
-    rating: place.rating,
-    category: place.categories?.items[0]?.category?.name,
-    noteCount: place.notes?.items?.length,
-    notes: place.notes?.items ?? [],
-    updatedAt: formatDate(place?.updatedAt ?? ""),
-    id: place.id,
-  }));
-
-  return {
-    rows: places,
-    nextToken: resp?.data?.listRestaurants?.nextToken ?? null,
-  };
-}
-
 export default function PlacesTable() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  async function getRestaurants() {
+    const resp = (await API.graphql<any>({
+      query: getAllRestaurants,
+      variables: {
+        filter: {
+          name: { contains: search },
+        },
+      },
+    })) as GraphQLResult<any>;
+
+    const result = resp?.data?.listRestaurants?.items ?? [];
+    const places: RestaurantRow[] = result.map((place: any) => ({
+      name: place.name,
+      rating: place.rating,
+      category: place.categories?.items[0]?.category?.name,
+      noteCount: place.notes?.items?.length,
+      notes: place.notes?.items ?? [],
+      updatedAt: formatDate(place?.updatedAt ?? ""),
+      id: place.id,
+    }));
+
+    return {
+      rows: places,
+      nextToken: resp?.data?.listRestaurants?.nextToken ?? null,
+    };
+  }
+
+  const query = useQuery({
+    queryKey: ["restaurants", debouncedSearch],
+    queryFn: getRestaurants,
+  });
+
   const columns = useMemo<ColumnDef<RestaurantRow>[]>(
     () => [
       {
@@ -161,18 +179,53 @@ export default function PlacesTable() {
   const getRowCanExpand = (row: Row<any>) =>
     Boolean(row.original.notes?.length);
 
-  const query = useQuery("restaurants", getRestaurants);
-
-  if (query?.isLoading) {
-    return <div>Loading</div>;
-  }
-
   return (
-    <Table
-      columns={columns as ColumnDef<unknown>[]}
-      rows={query?.data?.rows ?? []}
-      renderSubComponent={renderSubComponent}
-      getRowCanExpand={getRowCanExpand}
-    />
+    <>
+      <SpinnerOverlay isLoading={query.isLoading}></SpinnerOverlay>
+      <div className="container-fluid">
+        <div className="row m-3">
+          <div className="col-lg-8">
+            <NavLink
+              to={"add"}
+              className={"btn btn-sm btn-outline-light"}>
+              Add new
+              <FontAwesomeIcon
+                icon={faPizzaSlice}
+                className="ms-2"></FontAwesomeIcon>
+            </NavLink>
+          </div>
+          <div className="col-lg-4">
+            <div className="input-group mb-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search"
+                aria-label="Search"
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value.replace(
+                      /^(\w)(.*?)/,
+                      (match: string, p1: string, p2: string) =>
+                        `${p1.toUpperCase()}${p2}`
+                    )
+                  )
+                }
+              />
+              <span className="input-group-text">
+                <FontAwesomeIcon icon={faSearch} />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Table
+        columns={columns as ColumnDef<unknown>[]}
+        rows={query?.data?.rows ?? []}
+        renderSubComponent={renderSubComponent}
+        getRowCanExpand={getRowCanExpand}
+      />
+    </>
   );
 }

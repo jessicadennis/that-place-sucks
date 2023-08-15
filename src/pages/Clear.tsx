@@ -11,19 +11,17 @@ import {
 } from "../API";
 import awsconfig from "../aws-exports";
 import {
-  deleteRestaurantCategory,
-  listRestaurantCategories,
-} from "../graphql/custom-queries.js";
-import {
   deleteCategory,
   deleteNotes,
   deleteRestaurant,
-} from "../graphql/mutations.js";
+  deleteRestaurantCategory,
+} from "../graphql/mutations.ts";
 import {
   listCategories,
   listNotes,
   listRestaurants,
-} from "../graphql/queries.js";
+  listRestaurantCategories,
+} from "../graphql/queries.ts";
 import {
   Category,
   Notes,

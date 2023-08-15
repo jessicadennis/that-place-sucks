@@ -20,11 +20,11 @@ export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
       className="navbar fixed-top bg-dark-subtle"
       data-bs-theme="dark">
       <div className="container">
-        <a
-          className="navbar-brand"
-          href="/">
+        <NavLink
+          to={"/"}
+          className={"navbar-brand"}>
           That Place Sucks
-        </a>
+        </NavLink>
         <button
           className="navbar-toggler"
           type="button"
