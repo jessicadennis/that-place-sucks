@@ -1,6 +1,6 @@
 export const getAllRestaurants = /* GraphQL */ `
-  query getAllRestaurants() {
-    listRestaurants {
+  query getAllRestaurants($filter: ModelRestaurantFilterInput) {
+    listRestaurants(filter: $filter) {
       items {
         categories {
           items {
@@ -24,6 +24,69 @@ export const getAllRestaurants = /* GraphQL */ `
         rating
         updatedAt
       }
+    }
+  }
+`;
+
+export const searchRestaurantsWithCategories = /* GraphQL */ `
+  query SearchRestaurants(
+    $filter: SearchableRestaurantFilterInput
+    $sort: [SearchableRestaurantSortInput]
+    $limit: Int
+    $nextToken: String
+    $from: Int
+    $aggregates: [SearchableRestaurantAggregationInput]
+  ) {
+    searchRestaurants(
+      filter: $filter
+      sort: $sort
+      limit: $limit
+      nextToken: $nextToken
+      from: $from
+      aggregates: $aggregates
+    ) {
+      items {
+        categories {
+          items {
+            category {
+              id
+              name
+            }
+          }
+        }
+        id
+        name
+        notes {
+          items {
+            author
+            authorEmail
+            id
+            note
+            updatedAt
+          }
+        }
+        rating
+        updatedAt
+      }
+      nextToken
+      total
+      aggregateItems {
+        name
+        result {
+          ... on SearchableAggregateScalarResult {
+            value
+          }
+          ... on SearchableAggregateBucketResult {
+            buckets {
+              key
+              doc_count
+              __typename
+            }
+          }
+        }
+        __typename
+      }
+      __typename
     }
   }
 `;
@@ -63,205 +126,6 @@ export const getRestaurantById = /* GraphQL */ `
           updatedAt
         }
       }
-    }
-  }
-`;
-
-// These are literally copied and pasted from queries.js but whatever, amplify
-export const getRestaurantCategory = /* GraphQL */ `
-  query GetRestaurantCategory($id: ID!) {
-    getRestaurantCategory(id: $id) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        createdAt
-        updatedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listRestaurantCategories = /* GraphQL */ `
-  query ListRestaurantCategories(
-    $filter: ModelRestaurantCategoryFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listRestaurantCategories(
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        restaurantId
-        categoryId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const restaurantCategoriesByRestaurantId = /* GraphQL */ `
-  query RestaurantCategoriesByRestaurantId(
-    $restaurantId: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelRestaurantCategoryFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    restaurantCategoriesByRestaurantId(
-      restaurantId: $restaurantId
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        restaurantId
-        categoryId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const restaurantCategoriesByCategoryId = /* GraphQL */ `
-  query RestaurantCategoriesByCategoryId(
-    $categoryId: ID!
-    $sortDirection: ModelSortDirection
-    $filter: ModelRestaurantCategoryFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    restaurantCategoriesByCategoryId(
-      categoryId: $categoryId
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        restaurantId
-        categoryId
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const createRestaurantCategory = /* GraphQL */ `
-  mutation CreateRestaurantCategory(
-    $input: CreateRestaurantCategoryInput!
-    $condition: ModelRestaurantCategoryConditionInput
-  ) {
-    createRestaurantCategory(input: $input, condition: $condition) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        createdAt
-        updatedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const updateRestaurantCategory = /* GraphQL */ `
-  mutation UpdateRestaurantCategory(
-    $input: UpdateRestaurantCategoryInput!
-    $condition: ModelRestaurantCategoryConditionInput
-  ) {
-    updateRestaurantCategory(input: $input, condition: $condition) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        createdAt
-        updatedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const deleteRestaurantCategory = /* GraphQL */ `
-  mutation DeleteRestaurantCategory(
-    $input: DeleteRestaurantCategoryInput!
-    $condition: ModelRestaurantCategoryConditionInput
-  ) {
-    deleteRestaurantCategory(input: $input, condition: $condition) {
-      id
-      restaurantId
-      categoryId
-      restaurant {
-        id
-        name
-        rating
-        createdAt
-        updatedAt
-        __typename
-      }
-      category {
-        id
-        name
-        createdAt
-        updatedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      __typename
     }
   }
 `;

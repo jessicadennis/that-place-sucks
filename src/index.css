@@ -36,6 +36,18 @@ table.table tbody tr td {
   box-shadow: none;
 }
 
+.spinner-overlay {
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+}
+
 [data-amplify-authenticator] {
   align-items: center;
   display: flex;
