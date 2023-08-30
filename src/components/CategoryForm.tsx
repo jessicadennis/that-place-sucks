@@ -10,6 +10,7 @@ import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer, { ToastPosition } from "react-bootstrap/ToastContainer";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 
 type CategoryMutationInput = {
   name: string;
@@ -19,14 +20,12 @@ async function addCategory(input: CategoryMutationInput) {
   await API.graphql<GraphQLQuery<CreateCategoryMutation>>({
     query: createCategory,
     variables: {
-      input: {
-        name: input.name,
-      },
+      input,
     },
   });
 }
 
-export default function CategoryForm({
+function CategoryForm({
   existingCategories,
 }: {
   existingCategories: Category[];
@@ -47,7 +46,9 @@ export default function CategoryForm({
     setDupeError(false);
     setShow(false);
   };
-  const handleShow = () => setShow(true);
+  const handleShow = () => {
+    setShow(true);
+  };
 
   Amplify.configure(awsconfig);
 
@@ -84,7 +85,14 @@ export default function CategoryForm({
       nameField?.setCustomValidity("all-spaces name");
     }
 
-    if (existingCategories.findIndex((cat) => cat.name === name) > -1) {
+    const lowercaseCats = existingCategories.map((item) => ({
+      ...item,
+      name: item.name.toLowerCase(),
+    }));
+
+    if (
+      lowercaseCats.findIndex((cat) => cat.name === name.toLowerCase()) > -1
+    ) {
       nameField?.setCustomValidity("duplicate-category");
       setDupeError(true);
     } else {
@@ -140,7 +148,7 @@ export default function CategoryForm({
           <Button
             variant="primary"
             onClick={onSubmit}>
-            Save Changes
+            Save
           </Button>
         </Modal.Footer>
       </Modal>
@@ -175,3 +183,5 @@ export default function CategoryForm({
     </>
   );
 }
+
+export default withAuthenticator(CategoryForm);

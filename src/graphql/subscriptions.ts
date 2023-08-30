@@ -2,6 +2,45 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const onCreateDish = /* GraphQL */ `
+  subscription OnCreateDish($filter: ModelSubscriptionDishFilterInput) {
+    onCreateDish(filter: $filter) {
+      id
+      name
+      rating
+      restaurantID
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateDish = /* GraphQL */ `
+  subscription OnUpdateDish($filter: ModelSubscriptionDishFilterInput) {
+    onUpdateDish(filter: $filter) {
+      id
+      name
+      rating
+      restaurantID
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteDish = /* GraphQL */ `
+  subscription OnDeleteDish($filter: ModelSubscriptionDishFilterInput) {
+    onDeleteDish(filter: $filter) {
+      id
+      name
+      rating
+      restaurantID
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
 export const onCreateNotes = /* GraphQL */ `
   subscription OnCreateNotes($filter: ModelSubscriptionNotesFilterInput) {
     onCreateNotes(filter: $filter) {
@@ -60,6 +99,10 @@ export const onCreateRestaurant = /* GraphQL */ `
         nextToken
         __typename
       }
+      dishes {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -82,6 +125,10 @@ export const onUpdateRestaurant = /* GraphQL */ `
         nextToken
         __typename
       }
+      dishes {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -101,6 +148,10 @@ export const onDeleteRestaurant = /* GraphQL */ `
         __typename
       }
       categories {
+        nextToken
+        __typename
+      }
+      dishes {
         nextToken
         __typename
       }

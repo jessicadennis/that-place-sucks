@@ -2,27 +2,16 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type CreateNotesInput = {
-  id?: string | null,
-  note: string,
-  restaurantID: string,
-  author: string,
-  authorEmail: string,
-  _version?: number | null,
+export type ModelRestaurantFilterInput = {
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  rating?: ModelIntInput | null,
+  and?: Array< ModelRestaurantFilterInput | null > | null,
+  or?: Array< ModelRestaurantFilterInput | null > | null,
+  not?: ModelRestaurantFilterInput | null,
 };
 
-export type ModelNotesConditionInput = {
-  note?: ModelStringInput | null,
-  restaurantID?: ModelIDInput | null,
-  author?: ModelStringInput | null,
-  authorEmail?: ModelStringInput | null,
-  and?: Array< ModelNotesConditionInput | null > | null,
-  or?: Array< ModelNotesConditionInput | null > | null,
-  not?: ModelNotesConditionInput | null,
-  _deleted?: ModelBooleanInput | null,
-};
-
-export type ModelStringInput = {
+export type ModelIDInput = {
   ne?: string | null,
   eq?: string | null,
   le?: string | null,
@@ -62,7 +51,7 @@ export type ModelSizeInput = {
   between?: Array< number | null > | null,
 };
 
-export type ModelIDInput = {
+export type ModelStringInput = {
   ne?: string | null,
   eq?: string | null,
   le?: string | null,
@@ -78,59 +67,6 @@ export type ModelIDInput = {
   size?: ModelSizeInput | null,
 };
 
-export type ModelBooleanInput = {
-  ne?: boolean | null,
-  eq?: boolean | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-};
-
-export type Notes = {
-  __typename: "Notes",
-  id: string,
-  note: string,
-  restaurantID: string,
-  author: string,
-  authorEmail: string,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
-};
-
-export type UpdateNotesInput = {
-  id: string,
-  note?: string | null,
-  restaurantID?: string | null,
-  author?: string | null,
-  authorEmail?: string | null,
-  _version?: number | null,
-};
-
-export type DeleteNotesInput = {
-  id: string,
-  _version?: number | null,
-};
-
-export type CreateRestaurantInput = {
-  id?: string | null,
-  name: string,
-  rating: number,
-  categoryID: string,
-  _version?: number | null,
-};
-
-export type ModelRestaurantConditionInput = {
-  name?: ModelStringInput | null,
-  rating?: ModelIntInput | null,
-  categoryID?: ModelIDInput | null,
-  and?: Array< ModelRestaurantConditionInput | null > | null,
-  or?: Array< ModelRestaurantConditionInput | null > | null,
-  not?: ModelRestaurantConditionInput | null,
-  _deleted?: ModelBooleanInput | null,
-};
-
 export type ModelIntInput = {
   ne?: number | null,
   eq?: number | null,
@@ -143,44 +79,167 @@ export type ModelIntInput = {
   attributeType?: ModelAttributeTypes | null,
 };
 
+export type ModelRestaurantConnection = {
+  __typename: "ModelRestaurantConnection",
+  items:  Array<Restaurant | null >,
+  nextToken?: string | null,
+};
+
 export type Restaurant = {
   __typename: "Restaurant",
   id: string,
   name: string,
   rating: number,
-  categoryID: string,
-  Notes?: ModelNotesConnection | null,
+  notes?: ModelNotesConnection | null,
+  categories?: ModelRestaurantCategoryConnection | null,
+  dishes?: ModelDishConnection | null,
   createdAt: string,
   updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
 };
 
 export type ModelNotesConnection = {
   __typename: "ModelNotesConnection",
   items:  Array<Notes | null >,
   nextToken?: string | null,
-  startedAt?: number | null,
+};
+
+export type Notes = {
+  __typename: "Notes",
+  id: string,
+  note: string,
+  restaurantID: string,
+  author: string,
+  authorEmail: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelRestaurantCategoryConnection = {
+  __typename: "ModelRestaurantCategoryConnection",
+  items:  Array<RestaurantCategory | null >,
+  nextToken?: string | null,
+};
+
+export type RestaurantCategory = {
+  __typename: "RestaurantCategory",
+  id: string,
+  restaurantId: string,
+  categoryId: string,
+  restaurant: Restaurant,
+  category: Category,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type Category = {
+  __typename: "Category",
+  id: string,
+  name: string,
+  restaurants?: ModelRestaurantCategoryConnection | null,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type ModelDishConnection = {
+  __typename: "ModelDishConnection",
+  items:  Array<Dish | null >,
+  nextToken?: string | null,
+};
+
+export type Dish = {
+  __typename: "Dish",
+  id: string,
+  name: string,
+  rating: number,
+  restaurantID: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type CreateDishInput = {
+  id?: string | null,
+  name: string,
+  rating: number,
+  restaurantID: string,
+};
+
+export type ModelDishConditionInput = {
+  name?: ModelStringInput | null,
+  rating?: ModelIntInput | null,
+  restaurantID?: ModelIDInput | null,
+  and?: Array< ModelDishConditionInput | null > | null,
+  or?: Array< ModelDishConditionInput | null > | null,
+  not?: ModelDishConditionInput | null,
+};
+
+export type UpdateDishInput = {
+  id: string,
+  name?: string | null,
+  rating?: number | null,
+  restaurantID?: string | null,
+};
+
+export type DeleteDishInput = {
+  id: string,
+};
+
+export type CreateNotesInput = {
+  id?: string | null,
+  note: string,
+  restaurantID: string,
+  author: string,
+  authorEmail: string,
+};
+
+export type ModelNotesConditionInput = {
+  note?: ModelStringInput | null,
+  restaurantID?: ModelIDInput | null,
+  author?: ModelStringInput | null,
+  authorEmail?: ModelStringInput | null,
+  and?: Array< ModelNotesConditionInput | null > | null,
+  or?: Array< ModelNotesConditionInput | null > | null,
+  not?: ModelNotesConditionInput | null,
+};
+
+export type UpdateNotesInput = {
+  id: string,
+  note?: string | null,
+  restaurantID?: string | null,
+  author?: string | null,
+  authorEmail?: string | null,
+};
+
+export type DeleteNotesInput = {
+  id: string,
+};
+
+export type CreateRestaurantInput = {
+  id?: string | null,
+  name: string,
+  rating: number,
+};
+
+export type ModelRestaurantConditionInput = {
+  name?: ModelStringInput | null,
+  rating?: ModelIntInput | null,
+  and?: Array< ModelRestaurantConditionInput | null > | null,
+  or?: Array< ModelRestaurantConditionInput | null > | null,
+  not?: ModelRestaurantConditionInput | null,
 };
 
 export type UpdateRestaurantInput = {
   id: string,
   name?: string | null,
   rating?: number | null,
-  categoryID?: string | null,
-  _version?: number | null,
 };
 
 export type DeleteRestaurantInput = {
   id: string,
-  _version?: number | null,
 };
 
 export type CreateCategoryInput = {
   id?: string | null,
   name: string,
-  _version?: number | null,
 };
 
 export type ModelCategoryConditionInput = {
@@ -188,38 +247,56 @@ export type ModelCategoryConditionInput = {
   and?: Array< ModelCategoryConditionInput | null > | null,
   or?: Array< ModelCategoryConditionInput | null > | null,
   not?: ModelCategoryConditionInput | null,
-  _deleted?: ModelBooleanInput | null,
-};
-
-export type Category = {
-  __typename: "Category",
-  id: string,
-  name: string,
-  Restaurants?: ModelRestaurantConnection | null,
-  createdAt: string,
-  updatedAt: string,
-  _version: number,
-  _deleted?: boolean | null,
-  _lastChangedAt: number,
-};
-
-export type ModelRestaurantConnection = {
-  __typename: "ModelRestaurantConnection",
-  items:  Array<Restaurant | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
 };
 
 export type UpdateCategoryInput = {
   id: string,
   name?: string | null,
-  _version?: number | null,
 };
 
 export type DeleteCategoryInput = {
   id: string,
-  _version?: number | null,
 };
+
+export type CreateRestaurantCategoryInput = {
+  id?: string | null,
+  restaurantId: string,
+  categoryId: string,
+};
+
+export type ModelRestaurantCategoryConditionInput = {
+  restaurantId?: ModelIDInput | null,
+  categoryId?: ModelIDInput | null,
+  and?: Array< ModelRestaurantCategoryConditionInput | null > | null,
+  or?: Array< ModelRestaurantCategoryConditionInput | null > | null,
+  not?: ModelRestaurantCategoryConditionInput | null,
+};
+
+export type UpdateRestaurantCategoryInput = {
+  id: string,
+  restaurantId?: string | null,
+  categoryId?: string | null,
+};
+
+export type DeleteRestaurantCategoryInput = {
+  id: string,
+};
+
+export type ModelDishFilterInput = {
+  id?: ModelIDInput | null,
+  name?: ModelStringInput | null,
+  rating?: ModelIntInput | null,
+  restaurantID?: ModelIDInput | null,
+  and?: Array< ModelDishFilterInput | null > | null,
+  or?: Array< ModelDishFilterInput | null > | null,
+  not?: ModelDishFilterInput | null,
+};
+
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
 
 export type ModelNotesFilterInput = {
   id?: ModelIDInput | null,
@@ -230,24 +307,6 @@ export type ModelNotesFilterInput = {
   and?: Array< ModelNotesFilterInput | null > | null,
   or?: Array< ModelNotesFilterInput | null > | null,
   not?: ModelNotesFilterInput | null,
-  _deleted?: ModelBooleanInput | null,
-};
-
-export enum ModelSortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
-}
-
-
-export type ModelRestaurantFilterInput = {
-  id?: ModelIDInput | null,
-  name?: ModelStringInput | null,
-  rating?: ModelIntInput | null,
-  categoryID?: ModelIDInput | null,
-  and?: Array< ModelRestaurantFilterInput | null > | null,
-  or?: Array< ModelRestaurantFilterInput | null > | null,
-  not?: ModelRestaurantFilterInput | null,
-  _deleted?: ModelBooleanInput | null,
 };
 
 export type ModelCategoryFilterInput = {
@@ -256,25 +315,30 @@ export type ModelCategoryFilterInput = {
   and?: Array< ModelCategoryFilterInput | null > | null,
   or?: Array< ModelCategoryFilterInput | null > | null,
   not?: ModelCategoryFilterInput | null,
-  _deleted?: ModelBooleanInput | null,
 };
 
 export type ModelCategoryConnection = {
   __typename: "ModelCategoryConnection",
   items:  Array<Category | null >,
   nextToken?: string | null,
-  startedAt?: number | null,
 };
 
-export type ModelSubscriptionNotesFilterInput = {
+export type ModelRestaurantCategoryFilterInput = {
+  id?: ModelIDInput | null,
+  restaurantId?: ModelIDInput | null,
+  categoryId?: ModelIDInput | null,
+  and?: Array< ModelRestaurantCategoryFilterInput | null > | null,
+  or?: Array< ModelRestaurantCategoryFilterInput | null > | null,
+  not?: ModelRestaurantCategoryFilterInput | null,
+};
+
+export type ModelSubscriptionDishFilterInput = {
   id?: ModelSubscriptionIDInput | null,
-  note?: ModelSubscriptionStringInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  rating?: ModelSubscriptionIntInput | null,
   restaurantID?: ModelSubscriptionIDInput | null,
-  author?: ModelSubscriptionStringInput | null,
-  authorEmail?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionNotesFilterInput | null > | null,
-  or?: Array< ModelSubscriptionNotesFilterInput | null > | null,
-  _deleted?: ModelBooleanInput | null,
+  and?: Array< ModelSubscriptionDishFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDishFilterInput | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
@@ -307,16 +371,6 @@ export type ModelSubscriptionStringInput = {
   notIn?: Array< string | null > | null,
 };
 
-export type ModelSubscriptionRestaurantFilterInput = {
-  id?: ModelSubscriptionIDInput | null,
-  name?: ModelSubscriptionStringInput | null,
-  rating?: ModelSubscriptionIntInput | null,
-  categoryID?: ModelSubscriptionIDInput | null,
-  and?: Array< ModelSubscriptionRestaurantFilterInput | null > | null,
-  or?: Array< ModelSubscriptionRestaurantFilterInput | null > | null,
-  _deleted?: ModelBooleanInput | null,
-};
-
 export type ModelSubscriptionIntInput = {
   ne?: number | null,
   eq?: number | null,
@@ -329,12 +383,184 @@ export type ModelSubscriptionIntInput = {
   notIn?: Array< number | null > | null,
 };
 
+export type ModelSubscriptionNotesFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  note?: ModelSubscriptionStringInput | null,
+  restaurantID?: ModelSubscriptionIDInput | null,
+  author?: ModelSubscriptionStringInput | null,
+  authorEmail?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionNotesFilterInput | null > | null,
+  or?: Array< ModelSubscriptionNotesFilterInput | null > | null,
+};
+
+export type ModelSubscriptionRestaurantFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  name?: ModelSubscriptionStringInput | null,
+  rating?: ModelSubscriptionIntInput | null,
+  and?: Array< ModelSubscriptionRestaurantFilterInput | null > | null,
+  or?: Array< ModelSubscriptionRestaurantFilterInput | null > | null,
+};
+
 export type ModelSubscriptionCategoryFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   name?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionCategoryFilterInput | null > | null,
   or?: Array< ModelSubscriptionCategoryFilterInput | null > | null,
-  _deleted?: ModelBooleanInput | null,
+};
+
+export type ModelSubscriptionRestaurantCategoryFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  restaurantId?: ModelSubscriptionIDInput | null,
+  categoryId?: ModelSubscriptionIDInput | null,
+  and?: Array< ModelSubscriptionRestaurantCategoryFilterInput | null > | null,
+  or?: Array< ModelSubscriptionRestaurantCategoryFilterInput | null > | null,
+};
+
+export type getAllRestaurantsQueryVariables = {
+  filter?: ModelRestaurantFilterInput | null,
+};
+
+export type getAllRestaurantsQuery = {
+  listRestaurants?:  {
+    __typename: "ModelRestaurantConnection",
+    items:  Array< {
+      __typename: "Restaurant",
+      categories?:  {
+        __typename: "ModelRestaurantCategoryConnection",
+        items:  Array< {
+          __typename: "RestaurantCategory",
+          category:  {
+            __typename: "Category",
+            id: string,
+            name: string,
+          },
+        } | null >,
+      } | null,
+      dishes?:  {
+        __typename: "ModelDishConnection",
+        items:  Array< {
+          __typename: "Dish",
+          id: string,
+          name: string,
+          rating: number,
+          restaurantID: string,
+          updatedAt: string,
+        } | null >,
+      } | null,
+      id: string,
+      name: string,
+      notes?:  {
+        __typename: "ModelNotesConnection",
+        items:  Array< {
+          __typename: "Notes",
+          author: string,
+          authorEmail: string,
+          id: string,
+          note: string,
+          updatedAt: string,
+        } | null >,
+      } | null,
+      rating: number,
+      updatedAt: string,
+    } | null >,
+  } | null,
+};
+
+export type GetRestaurantByIdQueryVariables = {
+  id: string,
+};
+
+export type GetRestaurantByIdQuery = {
+  getRestaurant?:  {
+    __typename: "Restaurant",
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      items:  Array< {
+        __typename: "RestaurantCategory",
+        categoryId: string,
+        category:  {
+          __typename: "Category",
+          name: string,
+        },
+      } | null >,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      items:  Array< {
+        __typename: "Dish",
+        id: string,
+        name: string,
+        rating: number,
+        restaurantID: string,
+        updatedAt: string,
+      } | null >,
+    } | null,
+    id: string,
+    name: string,
+    rating: number,
+    updatedAt: string,
+    notes?:  {
+      __typename: "ModelNotesConnection",
+      items:  Array< {
+        __typename: "Notes",
+        author: string,
+        id: string,
+        note: string,
+        updatedAt: string,
+      } | null >,
+    } | null,
+  } | null,
+};
+
+export type CreateDishMutationVariables = {
+  input: CreateDishInput,
+  condition?: ModelDishConditionInput | null,
+};
+
+export type CreateDishMutation = {
+  createDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateDishMutationVariables = {
+  input: UpdateDishInput,
+  condition?: ModelDishConditionInput | null,
+};
+
+export type UpdateDishMutation = {
+  updateDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteDishMutationVariables = {
+  input: DeleteDishInput,
+  condition?: ModelDishConditionInput | null,
+};
+
+export type DeleteDishMutation = {
+  deleteDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type CreateNotesMutationVariables = {
@@ -352,9 +578,6 @@ export type CreateNotesMutation = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -373,9 +596,6 @@ export type UpdateNotesMutation = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -394,9 +614,6 @@ export type DeleteNotesMutation = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -411,30 +628,20 @@ export type CreateRestaurantMutation = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -449,30 +656,20 @@ export type UpdateRestaurantMutation = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -487,30 +684,20 @@ export type DeleteRestaurantMutation = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -524,33 +711,12 @@ export type CreateCategoryMutation = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -564,33 +730,12 @@ export type UpdateCategoryMutation = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -604,33 +749,167 @@ export type DeleteCategoryMutation = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
+  } | null,
+};
+
+export type CreateRestaurantCategoryMutationVariables = {
+  input: CreateRestaurantCategoryInput,
+  condition?: ModelRestaurantCategoryConditionInput | null,
+};
+
+export type CreateRestaurantCategoryMutation = {
+  createRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
+      __typename: "Category",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateRestaurantCategoryMutationVariables = {
+  input: UpdateRestaurantCategoryInput,
+  condition?: ModelRestaurantCategoryConditionInput | null,
+};
+
+export type UpdateRestaurantCategoryMutation = {
+  updateRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
+      __typename: "Category",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteRestaurantCategoryMutationVariables = {
+  input: DeleteRestaurantCategoryInput,
+  condition?: ModelRestaurantCategoryConditionInput | null,
+};
+
+export type DeleteRestaurantCategoryMutation = {
+  deleteRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
+      __typename: "Category",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type GetDishQueryVariables = {
+  id: string,
+};
+
+export type GetDishQuery = {
+  getDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListDishesQueryVariables = {
+  filter?: ModelDishFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListDishesQuery = {
+  listDishes?:  {
+    __typename: "ModelDishConnection",
+    items:  Array< {
+      __typename: "Dish",
+      id: string,
+      name: string,
+      rating: number,
+      restaurantID: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type DishesByRestaurantIDQueryVariables = {
+  restaurantID: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelDishFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type DishesByRestaurantIDQuery = {
+  dishesByRestaurantID?:  {
+    __typename: "ModelDishConnection",
+    items:  Array< {
+      __typename: "Dish",
+      id: string,
+      name: string,
+      rating: number,
+      restaurantID: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
@@ -648,9 +927,6 @@ export type GetNotesQuery = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -672,40 +948,8 @@ export type ListNotesQuery = {
       authorEmail: string,
       createdAt: string,
       updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
     } | null >,
     nextToken?: string | null,
-    startedAt?: number | null,
-  } | null,
-};
-
-export type SyncNotesQueryVariables = {
-  filter?: ModelNotesFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-  lastSync?: number | null,
-};
-
-export type SyncNotesQuery = {
-  syncNotes?:  {
-    __typename: "ModelNotesConnection",
-    items:  Array< {
-      __typename: "Notes",
-      id: string,
-      note: string,
-      restaurantID: string,
-      author: string,
-      authorEmail: string,
-      createdAt: string,
-      updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
-    } | null >,
-    nextToken?: string | null,
-    startedAt?: number | null,
   } | null,
 };
 
@@ -729,12 +973,8 @@ export type NotesByRestaurantIDQuery = {
       authorEmail: string,
       createdAt: string,
       updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
     } | null >,
     nextToken?: string | null,
-    startedAt?: number | null,
   } | null,
 };
 
@@ -748,30 +988,20 @@ export type GetRestaurantQuery = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -789,124 +1019,10 @@ export type ListRestaurantsQuery = {
       id: string,
       name: string,
       rating: number,
-      categoryID: string,
-      Notes?:  {
-        __typename: "ModelNotesConnection",
-        items:  Array< {
-          __typename: "Notes",
-          id: string,
-          note: string,
-          restaurantID: string,
-          author: string,
-          authorEmail: string,
-          createdAt: string,
-          updatedAt: string,
-          _version: number,
-          _deleted?: boolean | null,
-          _lastChangedAt: number,
-        } | null >,
-        nextToken?: string | null,
-        startedAt?: number | null,
-      } | null,
       createdAt: string,
       updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
     } | null >,
     nextToken?: string | null,
-    startedAt?: number | null,
-  } | null,
-};
-
-export type SyncRestaurantsQueryVariables = {
-  filter?: ModelRestaurantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-  lastSync?: number | null,
-};
-
-export type SyncRestaurantsQuery = {
-  syncRestaurants?:  {
-    __typename: "ModelRestaurantConnection",
-    items:  Array< {
-      __typename: "Restaurant",
-      id: string,
-      name: string,
-      rating: number,
-      categoryID: string,
-      Notes?:  {
-        __typename: "ModelNotesConnection",
-        items:  Array< {
-          __typename: "Notes",
-          id: string,
-          note: string,
-          restaurantID: string,
-          author: string,
-          authorEmail: string,
-          createdAt: string,
-          updatedAt: string,
-          _version: number,
-          _deleted?: boolean | null,
-          _lastChangedAt: number,
-        } | null >,
-        nextToken?: string | null,
-        startedAt?: number | null,
-      } | null,
-      createdAt: string,
-      updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
-    } | null >,
-    nextToken?: string | null,
-    startedAt?: number | null,
-  } | null,
-};
-
-export type RestaurantsByCategoryIDQueryVariables = {
-  categoryID: string,
-  sortDirection?: ModelSortDirection | null,
-  filter?: ModelRestaurantFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type RestaurantsByCategoryIDQuery = {
-  restaurantsByCategoryID?:  {
-    __typename: "ModelRestaurantConnection",
-    items:  Array< {
-      __typename: "Restaurant",
-      id: string,
-      name: string,
-      rating: number,
-      categoryID: string,
-      Notes?:  {
-        __typename: "ModelNotesConnection",
-        items:  Array< {
-          __typename: "Notes",
-          id: string,
-          note: string,
-          restaurantID: string,
-          author: string,
-          authorEmail: string,
-          createdAt: string,
-          updatedAt: string,
-          _version: number,
-          _deleted?: boolean | null,
-          _lastChangedAt: number,
-        } | null >,
-        nextToken?: string | null,
-        startedAt?: number | null,
-      } | null,
-      createdAt: string,
-      updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
-    } | null >,
-    nextToken?: string | null,
-    startedAt?: number | null,
   } | null,
 };
 
@@ -919,33 +1035,12 @@ export type GetCategoryQuery = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -962,73 +1057,155 @@ export type ListCategoriesQuery = {
       __typename: "Category",
       id: string,
       name: string,
-      Restaurants?:  {
-        __typename: "ModelRestaurantConnection",
-        items:  Array< {
-          __typename: "Restaurant",
-          id: string,
-          name: string,
-          rating: number,
-          categoryID: string,
-          createdAt: string,
-          updatedAt: string,
-          _version: number,
-          _deleted?: boolean | null,
-          _lastChangedAt: number,
-        } | null >,
-        nextToken?: string | null,
-        startedAt?: number | null,
-      } | null,
       createdAt: string,
       updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
     } | null >,
     nextToken?: string | null,
-    startedAt?: number | null,
   } | null,
 };
 
-export type SyncCategoriesQueryVariables = {
-  filter?: ModelCategoryFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-  lastSync?: number | null,
+export type GetRestaurantCategoryQueryVariables = {
+  id: string,
 };
 
-export type SyncCategoriesQuery = {
-  syncCategories?:  {
-    __typename: "ModelCategoryConnection",
-    items:  Array< {
+export type GetRestaurantCategoryQuery = {
+  getRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
       __typename: "Category",
       id: string,
       name: string,
-      Restaurants?:  {
-        __typename: "ModelRestaurantConnection",
-        items:  Array< {
-          __typename: "Restaurant",
-          id: string,
-          name: string,
-          rating: number,
-          categoryID: string,
-          createdAt: string,
-          updatedAt: string,
-          _version: number,
-          _deleted?: boolean | null,
-          _lastChangedAt: number,
-        } | null >,
-        nextToken?: string | null,
-        startedAt?: number | null,
-      } | null,
       createdAt: string,
       updatedAt: string,
-      _version: number,
-      _deleted?: boolean | null,
-      _lastChangedAt: number,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListRestaurantCategoriesQueryVariables = {
+  filter?: ModelRestaurantCategoryFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListRestaurantCategoriesQuery = {
+  listRestaurantCategories?:  {
+    __typename: "ModelRestaurantCategoryConnection",
+    items:  Array< {
+      __typename: "RestaurantCategory",
+      id: string,
+      restaurantId: string,
+      categoryId: string,
+      createdAt: string,
+      updatedAt: string,
     } | null >,
     nextToken?: string | null,
-    startedAt?: number | null,
+  } | null,
+};
+
+export type RestaurantCategoriesByRestaurantIdQueryVariables = {
+  restaurantId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelRestaurantCategoryFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type RestaurantCategoriesByRestaurantIdQuery = {
+  restaurantCategoriesByRestaurantId?:  {
+    __typename: "ModelRestaurantCategoryConnection",
+    items:  Array< {
+      __typename: "RestaurantCategory",
+      id: string,
+      restaurantId: string,
+      categoryId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type RestaurantCategoriesByCategoryIdQueryVariables = {
+  categoryId: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelRestaurantCategoryFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type RestaurantCategoriesByCategoryIdQuery = {
+  restaurantCategoriesByCategoryId?:  {
+    __typename: "ModelRestaurantCategoryConnection",
+    items:  Array< {
+      __typename: "RestaurantCategory",
+      id: string,
+      restaurantId: string,
+      categoryId: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type OnCreateDishSubscriptionVariables = {
+  filter?: ModelSubscriptionDishFilterInput | null,
+};
+
+export type OnCreateDishSubscription = {
+  onCreateDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateDishSubscriptionVariables = {
+  filter?: ModelSubscriptionDishFilterInput | null,
+};
+
+export type OnUpdateDishSubscription = {
+  onUpdateDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteDishSubscriptionVariables = {
+  filter?: ModelSubscriptionDishFilterInput | null,
+};
+
+export type OnDeleteDishSubscription = {
+  onDeleteDish?:  {
+    __typename: "Dish",
+    id: string,
+    name: string,
+    rating: number,
+    restaurantID: string,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -1046,9 +1223,6 @@ export type OnCreateNotesSubscription = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1066,9 +1240,6 @@ export type OnUpdateNotesSubscription = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1086,9 +1257,6 @@ export type OnDeleteNotesSubscription = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1102,30 +1270,20 @@ export type OnCreateRestaurantSubscription = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1139,30 +1297,20 @@ export type OnUpdateRestaurantSubscription = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1176,30 +1324,20 @@ export type OnDeleteRestaurantSubscription = {
     id: string,
     name: string,
     rating: number,
-    categoryID: string,
-    Notes?:  {
+    notes?:  {
       __typename: "ModelNotesConnection",
-      items:  Array< {
-        __typename: "Notes",
-        id: string,
-        note: string,
-        restaurantID: string,
-        author: string,
-        authorEmail: string,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
       nextToken?: string | null,
-      startedAt?: number | null,
+    } | null,
+    categories?:  {
+      __typename: "ModelRestaurantCategoryConnection",
+      nextToken?: string | null,
+    } | null,
+    dishes?:  {
+      __typename: "ModelDishConnection",
+      nextToken?: string | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1212,33 +1350,12 @@ export type OnCreateCategorySubscription = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1251,33 +1368,12 @@ export type OnUpdateCategorySubscription = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
   } | null,
 };
 
@@ -1290,32 +1386,101 @@ export type OnDeleteCategorySubscription = {
     __typename: "Category",
     id: string,
     name: string,
-    Restaurants?:  {
-      __typename: "ModelRestaurantConnection",
-      items:  Array< {
-        __typename: "Restaurant",
-        id: string,
-        name: string,
-        rating: number,
-        categoryID: string,
-        Notes?:  {
-          __typename: "ModelNotesConnection",
-          nextToken?: string | null,
-          startedAt?: number | null,
-        } | null,
-        createdAt: string,
-        updatedAt: string,
-        _version: number,
-        _deleted?: boolean | null,
-        _lastChangedAt: number,
-      } | null >,
+    restaurants?:  {
+      __typename: "ModelRestaurantCategoryConnection",
       nextToken?: string | null,
-      startedAt?: number | null,
     } | null,
     createdAt: string,
     updatedAt: string,
-    _version: number,
-    _deleted?: boolean | null,
-    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnCreateRestaurantCategorySubscriptionVariables = {
+  filter?: ModelSubscriptionRestaurantCategoryFilterInput | null,
+};
+
+export type OnCreateRestaurantCategorySubscription = {
+  onCreateRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
+      __typename: "Category",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateRestaurantCategorySubscriptionVariables = {
+  filter?: ModelSubscriptionRestaurantCategoryFilterInput | null,
+};
+
+export type OnUpdateRestaurantCategorySubscription = {
+  onUpdateRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
+      __typename: "Category",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteRestaurantCategorySubscriptionVariables = {
+  filter?: ModelSubscriptionRestaurantCategoryFilterInput | null,
+};
+
+export type OnDeleteRestaurantCategorySubscription = {
+  onDeleteRestaurantCategory?:  {
+    __typename: "RestaurantCategory",
+    id: string,
+    restaurantId: string,
+    categoryId: string,
+    restaurant:  {
+      __typename: "Restaurant",
+      id: string,
+      name: string,
+      rating: number,
+      createdAt: string,
+      updatedAt: string,
+    },
+    category:  {
+      __typename: "Category",
+      id: string,
+      name: string,
+      createdAt: string,
+      updatedAt: string,
+    },
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };

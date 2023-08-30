@@ -1,9 +1,9 @@
 import { GraphQLQuery } from "@aws-amplify/api";
 import {
-  withAuthenticator,
   WithAuthenticatorProps,
+  withAuthenticator,
 } from "@aws-amplify/ui-react";
-import { Amplify, API } from "aws-amplify";
+import { API, Amplify } from "aws-amplify";
 import { FormEvent, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +14,7 @@ import {
   UpdateRestaurantMutation,
 } from "../API";
 import awsconfig from "../aws-exports";
+import CategoryForm from "../components/CategoryForm.js";
 import { getRestaurantById } from "../graphql/custom-queries.js";
 import {
   createNotes,
@@ -24,8 +25,8 @@ import {
 } from "../graphql/mutations.ts";
 import { listCategories } from "../graphql/queries.js";
 import { restaurantCategoriesByRestaurantId } from "../graphql/queries.ts";
-import { Category, Notes } from "../models";
-import CategoryForm from "./CategoryForm.js";
+import { Category, Dish, Notes } from "../models";
+import DishesForm from "../components/DishesForm.tsx";
 
 async function getCategories() {
   const result = await API.graphql<GraphQLQuery<ListCategoriesQuery>>({
@@ -124,18 +125,34 @@ async function editRestaurant(input: RestauarntMutationInput) {
     },
   });
 
-  const promises = [
-    API.graphql<GraphQLQuery<any>>({
-      query: updateRestaurantCategory,
-      variables: {
-        input: {
-          id: input.restaurantCategoryId,
-          restaurantId: input.restaurantId,
-          categoryId: input.categoryId,
+  const promises = [];
+
+  if (input.restaurantCategoryId) {
+    promises.push(
+      API.graphql<GraphQLQuery<any>>({
+        query: updateRestaurantCategory,
+        variables: {
+          input: {
+            id: input.restaurantCategoryId,
+            restaurantId: input.restaurantId,
+            categoryId: input.categoryId,
+          },
         },
-      },
-    }),
-  ];
+      })
+    );
+  } else {
+    promises.push(
+      API.graphql<GraphQLQuery<any>>({
+        query: createRestaurantCategory,
+        variables: {
+          input: {
+            restaurantId: input.restaurantId,
+            categoryId: input.categoryId,
+          },
+        },
+      })
+    );
+  }
 
   if (input.note.trim().length) {
     promises.push(
@@ -156,20 +173,22 @@ async function editRestaurant(input: RestauarntMutationInput) {
   await Promise.all(promises);
 }
 
-export function PlaceForm({ user }: WithAuthenticatorProps) {
+function PlaceForm({ user }: WithAuthenticatorProps) {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(1);
   const [note, setNote] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [notes, setNotes] = useState<Notes[]>();
   const [restaurantCategoryId, setRestaurantCategoryId] = useState();
-
-  const title = "Add a Place";
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [id, setId] = useState("");
 
   Amplify.configure(awsconfig);
   const { restaurantId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const title = restaurantId ? "Add a Place" : "Edit Place";
 
   const catQuery = useQuery("categories", getCategories) as any;
   const categories = catQuery?.data?.listCategories?.items ?? [];
@@ -206,7 +225,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
           user?.attributes?.family_name ?? ""
         }`,
         userEmail: user?.attributes?.email ?? "unknown",
-        restaurantId: restaurantId,
+        restaurantId: restaurantId ?? id,
         restaurantCategoryId: restaurantCategoryId,
       }),
     onSuccess: () => {
@@ -234,7 +253,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
     if (form.checkValidity()) {
       form.classList.add("was-validated");
 
-      if (restaurantId) {
+      if (restaurantId || id) {
         editMutation.mutate();
       } else {
         addMutation.mutate();
@@ -242,6 +261,10 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
     } else {
       form.classList.add("was-validated");
     }
+  }
+
+  function onCreateForDish(restaurantId: string) {
+    setId(restaurantId);
   }
 
   function resetForm() {
@@ -254,7 +277,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
     form?.classList.remove("was-validated");
   }
 
-  useEffect(() => {
+  const restaurantQuery = useQuery(["restaurant", restaurantId], () => {
     if (restaurantId) {
       API.graphql<GraphQLQuery<any>>({
         query: getRestaurantById,
@@ -268,6 +291,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
           setCategoryId(placeData?.categories?.items[0]?.categoryId);
           setRating(parseInt(placeData?.rating, 10));
           setNotes(placeData?.notes?.items ?? []);
+          setDishes(placeData?.dishes?.items ?? []);
 
           API.graphql<GraphQLQuery<any>>({
             query: restaurantCategoriesByRestaurantId,
@@ -277,14 +301,14 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
           }).then((result) => {
             const restCat =
               result?.data?.restaurantCategoriesByRestaurantId.items[0] ?? null;
-            setRestaurantCategoryId(restCat.id ?? null);
+            setRestaurantCategoryId(restCat?.id ?? null);
           });
         })
         .catch((error) => console.error(error));
     } else {
       resetForm();
     }
-  }, [restaurantId]);
+  });
 
   return (
     <>
@@ -339,6 +363,7 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
                   </select>
                 </div>
                 <div className="button-container mb-1">
+                  {/* TODO: select new category on creation */}
                   <CategoryForm existingCategories={categories} />
                 </div>
               </div>
@@ -365,6 +390,39 @@ export function PlaceForm({ user }: WithAuthenticatorProps) {
                 ))}
               </select>
               <div className="invalid-feedback">Rating is required</div>
+            </div>
+          </div>
+
+          <div className="row mb-4">
+            <div className="col">
+              <div className="d-flex align-items-end mb-3">
+                <h2 className="h4 mb-0">Dishes</h2>
+                <div className="button-container ms-3">
+                  <DishesForm
+                    restaurantId={restaurantId ?? ""}
+                    restaurantName={name}
+                    restaurantRating={rating}
+                    createCallback={onCreateForDish}
+                  />
+                </div>
+              </div>
+              <ul>
+                {Boolean(dishes?.length) && (
+                  <li className="row py-2 fw-semibold">
+                    <div className="col-6">Name</div>
+                    <div className="col-4">Rating</div>
+                  </li>
+                )}
+                {dishes?.map((dish, index) => (
+                  <li
+                    key={index}
+                    className="row py-2 border-top border-bottom">
+                    <div className="col-6">{dish.name}</div>
+                    <div className="col-4">{dish.rating}</div>
+                  </li>
+                ))}
+                {!dishes?.length && <li>No dishes have been added yet</li>}
+              </ul>
             </div>
           </div>
           {/* TODO: list existing notes with X to remove */}

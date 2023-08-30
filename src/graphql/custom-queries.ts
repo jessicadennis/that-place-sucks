@@ -10,48 +10,13 @@ export const getAllRestaurants = /* GraphQL */ `
             }
           }
         }
-        id
-        name
-        notes {
+        dishes {
           items {
-            author
-            authorEmail
             id
-            note
+            name
+            rating
+            restaurantID
             updatedAt
-          }
-        }
-        rating
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const searchRestaurantsWithCategories = /* GraphQL */ `
-  query SearchRestaurants(
-    $filter: SearchableRestaurantFilterInput
-    $sort: [SearchableRestaurantSortInput]
-    $limit: Int
-    $nextToken: String
-    $from: Int
-    $aggregates: [SearchableRestaurantAggregationInput]
-  ) {
-    searchRestaurants(
-      filter: $filter
-      sort: $sort
-      limit: $limit
-      nextToken: $nextToken
-      from: $from
-      aggregates: $aggregates
-    ) {
-      items {
-        categories {
-          items {
-            category {
-              id
-              name
-            }
           }
         }
         id
@@ -66,37 +31,6 @@ export const searchRestaurantsWithCategories = /* GraphQL */ `
           }
         }
         rating
-        updatedAt
-      }
-      nextToken
-      total
-      aggregateItems {
-        name
-        result {
-          ... on SearchableAggregateScalarResult {
-            value
-          }
-          ... on SearchableAggregateBucketResult {
-            buckets {
-              key
-              doc_count
-              __typename
-            }
-          }
-        }
-        __typename
-      }
-      __typename
-    }
-  }
-`;
-
-export const listValidCategories = /* GraphQL */ `
-  query listValidCategories {
-    listCategories(limit: 1000, filter: { _deleted: { ne: true } }) {
-      items {
-        name
-        id
         updatedAt
       }
     }
@@ -114,6 +48,15 @@ export const getRestaurantById = /* GraphQL */ `
           }
         }
       }
+      dishes {
+        items {
+          id
+          name
+          rating
+          restaurantID
+          updatedAt
+        }
+      }
       id
       name
       rating
@@ -125,6 +68,19 @@ export const getRestaurantById = /* GraphQL */ `
           note
           updatedAt
         }
+      }
+    }
+  }
+`;
+
+export const getDishesByRestaurant = /* GraphQL */ `
+  query dishesByRestaurantID($restaurantID: ID!) {
+    dishesByRestaurantID(restaurantID: $restaurantID) {
+      items {
+        id
+        name
+        rating
+        restaurantID
       }
     }
   }
