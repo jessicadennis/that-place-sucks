@@ -2,6 +2,54 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const createDish = /* GraphQL */ `
+  mutation CreateDish(
+    $input: CreateDishInput!
+    $condition: ModelDishConditionInput
+  ) {
+    createDish(input: $input, condition: $condition) {
+      id
+      name
+      rating
+      restaurantID
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateDish = /* GraphQL */ `
+  mutation UpdateDish(
+    $input: UpdateDishInput!
+    $condition: ModelDishConditionInput
+  ) {
+    updateDish(input: $input, condition: $condition) {
+      id
+      name
+      rating
+      restaurantID
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteDish = /* GraphQL */ `
+  mutation DeleteDish(
+    $input: DeleteDishInput!
+    $condition: ModelDishConditionInput
+  ) {
+    deleteDish(input: $input, condition: $condition) {
+      id
+      name
+      rating
+      restaurantID
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
 export const createNotes = /* GraphQL */ `
   mutation CreateNotes(
     $input: CreateNotesInput!
@@ -70,6 +118,10 @@ export const createRestaurant = /* GraphQL */ `
         nextToken
         __typename
       }
+      dishes {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -93,6 +145,10 @@ export const updateRestaurant = /* GraphQL */ `
         nextToken
         __typename
       }
+      dishes {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -113,6 +169,10 @@ export const deleteRestaurant = /* GraphQL */ `
         __typename
       }
       categories {
+        nextToken
+        __typename
+      }
+      dishes {
         nextToken
         __typename
       }

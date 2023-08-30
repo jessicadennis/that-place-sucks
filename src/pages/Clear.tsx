@@ -29,6 +29,8 @@ import {
   RestaurantCategory,
 } from "../models/index.js";
 
+// TODO: Also delete dishes
+
 async function getCategories() {
   const result = await API.graphql<GraphQLQuery<ListCategoriesQuery>>({
     query: listCategories,

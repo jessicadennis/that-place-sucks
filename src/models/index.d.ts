@@ -6,6 +6,38 @@ import { LazyLoading, LazyLoadingDisabled, AsyncCollection, AsyncItem } from "@a
 
 
 
+type EagerDish = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Dish, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly rating: number;
+  readonly restaurantID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyDish = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Dish, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly name: string;
+  readonly rating: number;
+  readonly restaurantID: string;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Dish = LazyLoading extends LazyLoadingDisabled ? EagerDish : LazyDish
+
+export declare const Dish: (new (init: ModelInit<Dish>) => Dish) & {
+  copyOf(source: Dish, mutator: (draft: MutableModel<Dish>) => MutableModel<Dish> | void): Dish;
+}
+
 type EagerNotes = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<Notes, 'id'>;
@@ -50,6 +82,7 @@ type EagerRestaurant = {
   readonly rating: number;
   readonly notes?: (Notes | null)[] | null;
   readonly categories?: (RestaurantCategory | null)[] | null;
+  readonly dishes?: (Dish | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -64,6 +97,7 @@ type LazyRestaurant = {
   readonly rating: number;
   readonly notes: AsyncCollection<Notes>;
   readonly categories: AsyncCollection<RestaurantCategory>;
+  readonly dishes: AsyncCollection<Dish>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

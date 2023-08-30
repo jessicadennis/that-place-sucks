@@ -1,4 +1,11 @@
-type Notes @model @auth(rules: [{ allow: public }]) {
+type Dish @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String!
+  rating: Int!
+  restaurantID: ID! @index(name: "byRestaurant")
+}
+
+type Notes @model @auth(rules: [{allow: public}]) {
   id: ID!
   note: String!
   restaurantID: ID! @index(name: "byRestaurant")
@@ -6,16 +13,18 @@ type Notes @model @auth(rules: [{ allow: public }]) {
   authorEmail: String!
 }
 
-type Restaurant @model @auth(rules: [{ allow: public }]) {
+type Restaurant @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
   rating: Int!
   notes: [Notes] @hasMany(indexName: "byRestaurant", fields: ["id"])
   categories: [Category] @manyToMany(relationName: "RestaurantCategory")
+  dishes: [Dish] @hasMany(indexName: "byRestaurant", fields: ["id"])
 }
 
-type Category @model @auth(rules: [{ allow: public }]) {
+type Category @model @auth(rules: [{allow: public}]) {
   id: ID!
   name: String!
   restaurants: [Restaurant] @manyToMany(relationName: "RestaurantCategory")
 }
+ 
