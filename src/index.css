@@ -36,6 +36,10 @@ table.table tbody tr td {
   box-shadow: none;
 }
 
+.toast.show {
+  z-index: 1060;
+}
+
 .spinner-overlay {
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);

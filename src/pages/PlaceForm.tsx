@@ -4,7 +4,7 @@ import {
   withAuthenticator,
 } from "@aws-amplify/ui-react";
 import { API, Amplify } from "aws-amplify";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -27,6 +27,9 @@ import { listCategories } from "../graphql/queries.js";
 import { restaurantCategoriesByRestaurantId } from "../graphql/queries.ts";
 import { Category, Dish, Notes } from "../models";
 import DishesForm from "../components/DishesForm.tsx";
+import UserInfo from "../utilities/user-info.ts";
+import { Toast, ToastContainer } from "react-bootstrap";
+import { ToastPosition } from "react-bootstrap/esm/ToastContainer";
 
 async function getCategories() {
   const result = await API.graphql<GraphQLQuery<ListCategoriesQuery>>({
@@ -173,6 +176,9 @@ async function editRestaurant(input: RestauarntMutationInput) {
   await Promise.all(promises);
 }
 
+const userGroups = new UserInfo();
+const canAddCategories = await userGroups.getIsAdminOrSuperUser();
+
 function PlaceForm({ user }: WithAuthenticatorProps) {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(1);
@@ -182,8 +188,12 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
   const [restaurantCategoryId, setRestaurantCategoryId] = useState();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [id, setId] = useState("");
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastPosition] = useState("top-end" as ToastPosition);
 
   Amplify.configure(awsconfig);
+
   const { restaurantId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -206,10 +216,12 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
         userEmail: user?.attributes?.email ?? "unknown",
       }),
     onSuccess: () => {
-      resetForm(), queryClient.invalidateQueries("restaurants");
+      setShowSuccessToast(true);
+      resetForm();
+      queryClient.invalidateQueries("restaurants");
     },
     onError: (error) => {
-      // TODO: toast or someting
+      setShowErrorToast(true);
       console.error(error);
     },
   });
@@ -229,11 +241,12 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
         restaurantCategoryId: restaurantCategoryId,
       }),
     onSuccess: () => {
+      setShowSuccessToast(true);
       queryClient.invalidateQueries("restaurants");
       navigate("/");
     },
     onError: (error) => {
-      // TODO: toast or someting
+      setShowErrorToast(true);
       console.error(error);
     },
   });
@@ -362,10 +375,11 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
                     ))}
                   </select>
                 </div>
-                <div className="button-container mb-1">
-                  {/* TODO: select new category on creation */}
-                  <CategoryForm existingCategories={categories} />
-                </div>
+                {canAddCategories && (
+                  <div className="button-container mb-1">
+                    <CategoryForm existingCategories={categories} />
+                  </div>
+                )}
               </div>
             </div>
             <div className="col-lg-4">
@@ -454,6 +468,34 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
         </div>
       </form>
       {renderNotes(notes ?? [])}
+      <ToastContainer
+        position={toastPosition}
+        style={{ zIndex: 1 }}>
+        <Toast
+          bg="success"
+          onClose={() => setShowSuccessToast(false)}
+          show={showSuccessToast}
+          delay={3000}
+          autohide>
+          <Toast.Header>
+            <span className="me-auto">Success</span>
+          </Toast.Header>
+          <Toast.Body>{name} has been saved</Toast.Body>
+        </Toast>
+        <Toast
+          bg="danger"
+          onClose={() => setShowErrorToast(false)}
+          show={showErrorToast}
+          delay={3000}
+          autohide>
+          <Toast.Header>
+            <span className="me-auto">Error</span>
+          </Toast.Header>
+          <Toast.Body>
+            Oh no! Something bad happened and {name} was not saved!
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </>
   );
 }

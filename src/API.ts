@@ -112,6 +112,7 @@ export type Notes = {
   authorEmail: string,
   createdAt: string,
   updatedAt: string,
+  owner?: string | null,
 };
 
 export type ModelRestaurantCategoryConnection = {
@@ -154,6 +155,7 @@ export type Dish = {
   restaurantID: string,
   createdAt: string,
   updatedAt: string,
+  owner?: string | null,
 };
 
 export type CreateDishInput = {
@@ -490,6 +492,7 @@ export type GetRestaurantByIdQuery = {
         __typename: "Dish",
         id: string,
         name: string,
+        owner?: string | null,
         rating: number,
         restaurantID: string,
         updatedAt: string,
@@ -506,9 +509,28 @@ export type GetRestaurantByIdQuery = {
         author: string,
         id: string,
         note: string,
+        owner?: string | null,
         updatedAt: string,
       } | null >,
     } | null,
+  } | null,
+};
+
+export type dishesByRestaurantIDQueryVariables = {
+  restaurantID: string,
+};
+
+export type dishesByRestaurantIDQuery = {
+  dishesByRestaurantID?:  {
+    __typename: "ModelDishConnection",
+    items:  Array< {
+      __typename: "Dish",
+      id: string,
+      name: string,
+      owner?: string | null,
+      rating: number,
+      restaurantID: string,
+    } | null >,
   } | null,
 };
 
@@ -526,6 +548,7 @@ export type CreateDishMutation = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -543,6 +566,7 @@ export type UpdateDishMutation = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -560,6 +584,7 @@ export type DeleteDishMutation = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -578,6 +603,7 @@ export type CreateNotesMutation = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -596,6 +622,7 @@ export type UpdateNotesMutation = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -614,6 +641,7 @@ export type DeleteNotesMutation = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -864,6 +892,7 @@ export type GetDishQuery = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -884,6 +913,7 @@ export type ListDishesQuery = {
       restaurantID: string,
       createdAt: string,
       updatedAt: string,
+      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -908,6 +938,7 @@ export type DishesByRestaurantIDQuery = {
       restaurantID: string,
       createdAt: string,
       updatedAt: string,
+      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -927,6 +958,7 @@ export type GetNotesQuery = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
@@ -948,6 +980,7 @@ export type ListNotesQuery = {
       authorEmail: string,
       createdAt: string,
       updatedAt: string,
+      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -973,6 +1006,7 @@ export type NotesByRestaurantIDQuery = {
       authorEmail: string,
       createdAt: string,
       updatedAt: string,
+      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -1163,6 +1197,7 @@ export type RestaurantCategoriesByCategoryIdQuery = {
 
 export type OnCreateDishSubscriptionVariables = {
   filter?: ModelSubscriptionDishFilterInput | null,
+  owner?: string | null,
 };
 
 export type OnCreateDishSubscription = {
@@ -1174,11 +1209,13 @@ export type OnCreateDishSubscription = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
 export type OnUpdateDishSubscriptionVariables = {
   filter?: ModelSubscriptionDishFilterInput | null,
+  owner?: string | null,
 };
 
 export type OnUpdateDishSubscription = {
@@ -1190,11 +1227,13 @@ export type OnUpdateDishSubscription = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
 export type OnDeleteDishSubscriptionVariables = {
   filter?: ModelSubscriptionDishFilterInput | null,
+  owner?: string | null,
 };
 
 export type OnDeleteDishSubscription = {
@@ -1206,11 +1245,13 @@ export type OnDeleteDishSubscription = {
     restaurantID: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
 export type OnCreateNotesSubscriptionVariables = {
   filter?: ModelSubscriptionNotesFilterInput | null,
+  owner?: string | null,
 };
 
 export type OnCreateNotesSubscription = {
@@ -1223,11 +1264,13 @@ export type OnCreateNotesSubscription = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
 export type OnUpdateNotesSubscriptionVariables = {
   filter?: ModelSubscriptionNotesFilterInput | null,
+  owner?: string | null,
 };
 
 export type OnUpdateNotesSubscription = {
@@ -1240,11 +1283,13 @@ export type OnUpdateNotesSubscription = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 
 export type OnDeleteNotesSubscriptionVariables = {
   filter?: ModelSubscriptionNotesFilterInput | null,
+  owner?: string | null,
 };
 
 export type OnDeleteNotesSubscription = {
@@ -1257,6 +1302,7 @@ export type OnDeleteNotesSubscription = {
     authorEmail: string,
     createdAt: string,
     updatedAt: string,
+    owner?: string | null,
   } | null,
 };
 

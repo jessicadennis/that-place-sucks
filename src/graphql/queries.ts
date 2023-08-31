@@ -11,6 +11,7 @@ export const getDish = /* GraphQL */ `
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -29,6 +30,7 @@ export const listDishes = /* GraphQL */ `
         restaurantID
         createdAt
         updatedAt
+        owner
         __typename
       }
       nextToken
@@ -58,6 +60,7 @@ export const dishesByRestaurantID = /* GraphQL */ `
         restaurantID
         createdAt
         updatedAt
+        owner
         __typename
       }
       nextToken
@@ -75,6 +78,7 @@ export const getNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -94,6 +98,7 @@ export const listNotes = /* GraphQL */ `
         authorEmail
         createdAt
         updatedAt
+        owner
         __typename
       }
       nextToken
@@ -124,6 +129,7 @@ export const notesByRestaurantID = /* GraphQL */ `
         authorEmail
         createdAt
         updatedAt
+        owner
         __typename
       }
       nextToken

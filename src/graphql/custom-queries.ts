@@ -52,6 +52,7 @@ export const getRestaurantById = /* GraphQL */ `
         items {
           id
           name
+          owner
           rating
           restaurantID
           updatedAt
@@ -66,6 +67,7 @@ export const getRestaurantById = /* GraphQL */ `
           author
           id
           note
+          owner
           updatedAt
         }
       }
@@ -79,6 +81,7 @@ export const getDishesByRestaurant = /* GraphQL */ `
       items {
         id
         name
+        owner
         rating
         restaurantID
       }

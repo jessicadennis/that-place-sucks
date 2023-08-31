@@ -1,11 +1,27 @@
-type Dish @model @auth(rules: [{allow: public}]) {
+type Dish
+  @model
+  @auth(
+    rules: [
+      { allow: owner }
+      { allow: groups, groups: ["admin"] }
+      { allow: groups, groups: ["user"], operations: [create, read, update] }
+    ]
+  ) {
   id: ID!
   name: String!
   rating: Int!
   restaurantID: ID! @index(name: "byRestaurant")
 }
 
-type Notes @model @auth(rules: [{allow: public}]) {
+type Notes
+  @model
+  @auth(
+    rules: [
+      { allow: owner }
+      { allow: groups, groups: ["admin"] }
+      { allow: groups, groups: ["user"], operations: [create, read, update] }
+    ]
+  ) {
   id: ID!
   note: String!
   restaurantID: ID! @index(name: "byRestaurant")
@@ -13,7 +29,14 @@ type Notes @model @auth(rules: [{allow: public}]) {
   authorEmail: String!
 }
 
-type Restaurant @model @auth(rules: [{allow: public}]) {
+type Restaurant
+  @model
+  @auth(
+    rules: [
+      { allow: groups, groups: ["admin", "superuser"] }
+      { allow: groups, groups: ["user"], operations: [create, read, update] }
+    ]
+  ) {
   id: ID!
   name: String!
   rating: Int!
@@ -22,9 +45,20 @@ type Restaurant @model @auth(rules: [{allow: public}]) {
   dishes: [Dish] @hasMany(indexName: "byRestaurant", fields: ["id"])
 }
 
-type Category @model @auth(rules: [{allow: public}]) {
+type Category
+  @model
+  @auth(
+    rules: [
+      { allow: groups, groups: ["admin"] }
+      {
+        allow: groups
+        groups: ["superusr"]
+        operations: [create, read, update]
+      }
+      { allow: groups, groups: ["user"], operations: [read] }
+    ]
+  ) {
   id: ID!
   name: String!
   restaurants: [Restaurant] @manyToMany(relationName: "RestaurantCategory")
 }
- 
