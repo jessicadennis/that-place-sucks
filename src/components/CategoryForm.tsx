@@ -9,7 +9,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Toast from "react-bootstrap/Toast";
-import ToastContainer, { ToastPosition } from "react-bootstrap/ToastContainer";
+import ToastContainer from "react-bootstrap/ToastContainer";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 
 type CategoryMutationInput = {
@@ -35,7 +35,9 @@ function CategoryForm({
   const [show, setShow] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
-  const [toastPosition] = useState("top-end" as ToastPosition);
+
+  const toastPosition = "top-end";
+  const toastDelay = 5000;
 
   const handleClose = () => {
     const form: HTMLFormElement = document.getElementById(
@@ -154,12 +156,12 @@ function CategoryForm({
       </Modal>
       <ToastContainer
         position={toastPosition}
-        style={{ zIndex: 1 }}>
+        style={{ zIndex: 1060 }}>
         <Toast
           bg="success"
           onClose={() => setShowSuccessToast(false)}
           show={showSuccessToast}
-          delay={3000}
+          delay={5000}
           autohide>
           <Toast.Header>
             <span className="me-auto">Success</span>
@@ -170,7 +172,7 @@ function CategoryForm({
           bg="danger"
           onClose={() => setShowErrorToast(false)}
           show={showErrorToast}
-          delay={3000}
+          delay={toastDelay}
           autohide>
           <Toast.Header>
             <span className="me-auto">Error</span>

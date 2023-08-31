@@ -14,6 +14,7 @@ export const createDish = /* GraphQL */ `
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -30,6 +31,7 @@ export const updateDish = /* GraphQL */ `
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -46,6 +48,7 @@ export const deleteDish = /* GraphQL */ `
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -63,6 +66,7 @@ export const createNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -80,6 +84,7 @@ export const updateNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
@@ -97,6 +102,7 @@ export const deleteNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }

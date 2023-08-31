@@ -1,35 +1,34 @@
 import { GraphQLQuery } from "@aws-amplify/api";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { API, Amplify } from "aws-amplify";
 import { useState } from "react";
+import { Col, Row } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer, { ToastPosition } from "react-bootstrap/ToastContainer";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   CreateDishMutation,
   CreateRestaurantMutation,
   DeleteDishMutation,
+  Dish,
   DishesByRestaurantIDQuery,
   UpdateDishMutation,
 } from "../API";
 import awsconfig from "../aws-exports.js";
+import { getDishesByRestaurant } from "../graphql/custom-queries.ts";
 import {
   createDish,
   createRestaurant,
   deleteDish,
   updateDish,
 } from "../graphql/mutations.ts";
-import { Dish } from "../models/index";
+import UserInfo from "../utilities/user-info.ts";
 import SpinnerOverlay from "./SpinnerOverlay.tsx";
-import { useMutation, useQueryClient } from "react-query";
-import { getDishesByRestaurant } from "../graphql/custom-queries.ts";
-import { withAuthenticator } from "@aws-amplify/ui-react";
-import { Col, Row } from "react-bootstrap";
-import { getDish } from "../graphql/queries.ts";
 
 async function getDishes(restaurantId: string) {
   if (restaurantId) {
@@ -77,6 +76,10 @@ async function deleteADish(input: { id: string }) {
     },
   });
 }
+
+const userGroups = new UserInfo();
+const user = await userGroups.getUser();
+const canDelete = await userGroups.getIsAdmin();
 
 function DishesForm({
   restaurantId,
@@ -138,6 +141,7 @@ function DishesForm({
         restaurantID,
       }),
     onSuccess: () => {
+      form?.classList?.remove("was-validated");
       setName("");
       setRating(1);
       setShowSuccessToast(true);
@@ -177,7 +181,7 @@ function DishesForm({
   });
 
   const handleClose = () => {
-    form.classList.remove("was-validated");
+    form?.classList?.remove("was-validated");
     setName("");
     setDupeError(false);
     setShow(false);
@@ -239,7 +243,7 @@ function DishesForm({
             <Row className="d-flex align-items-end justify-content-stretch mb-3">
               <Col
                 xs={12}
-                md={7}>
+                md={6}>
                 <Form.Group controlId="newDishName">
                   <Form.Label>Dish Name</Form.Label>
                   <Form.Control
@@ -257,8 +261,11 @@ function DishesForm({
               </Col>
               <Col
                 xs={12}
-                md={3}>
-                <Form.Group controlId="newDishRating">
+                md={6}
+                className="d-flex align-items-end">
+                <Form.Group
+                  controlId="newDishRating"
+                  className="flex-fill">
                   <Form.Label>Rating</Form.Label>
                   <Form.Select
                     value={rating}
@@ -274,17 +281,19 @@ function DishesForm({
                     ))}
                   </Form.Select>
                 </Form.Group>
-              </Col>
-              <Col
-                xs={12}
-                md={2}>
                 <Button
+                  className="ms-2"
                   variant="primary"
+                  disabled={!name}
                   onClick={() => {
-                    checkDupes(name);
-                    if (!dupeError) {
-                      addDishMutation.mutate();
+                    if (form.checkValidity()) {
+                      checkDupes(name);
+                      if (!dupeError) {
+                        addDishMutation.mutate();
+                      }
                     }
+
+                    form?.classList?.add("was-validated");
                   }}>
                   Add
                 </Button>
@@ -306,8 +315,8 @@ function DishesForm({
                       <li
                         key={index}
                         className="row d-flex align-items-center py-2 border-bottom">
-                        <div className="col-4">{dish.name}</div>
-                        <div className="col-4">
+                        <div className="col-6">{dish.name}</div>
+                        <div className="col-6 d-flex align-items-center">
                           <select
                             className="form-select"
                             id="rating"
@@ -330,21 +339,21 @@ function DishesForm({
                               </option>
                             ))}
                           </select>
-                        </div>
-                        <div className="col-4">
-                          <button
-                            className="btn btn-sm btn-outline-light"
-                            onClick={() => {
-                              deleteDishMutation.mutate({
-                                id: dish.id,
-                              });
-                            }}>
-                            Delete
-                            <FontAwesomeIcon
-                              className="ms-2"
-                              icon={faTrashCan}
-                            />
-                          </button>
+                          {(canDelete || dish.owner === user.username) && (
+                            <button
+                              className="btn btn-sm btn-outline-light ms-3 d-flex flex-nowrap align-items-center"
+                              onClick={() => {
+                                deleteDishMutation.mutate({
+                                  id: dish.id,
+                                });
+                              }}>
+                              Delete
+                              <FontAwesomeIcon
+                                className="ms-2"
+                                icon={faTrashCan}
+                              />
+                            </button>
+                          )}
                         </div>
                       </li>
                     ))}

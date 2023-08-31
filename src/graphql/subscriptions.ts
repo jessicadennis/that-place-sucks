@@ -3,47 +3,62 @@
 // this is an auto generated file. This will be overwritten
 
 export const onCreateDish = /* GraphQL */ `
-  subscription OnCreateDish($filter: ModelSubscriptionDishFilterInput) {
-    onCreateDish(filter: $filter) {
+  subscription OnCreateDish(
+    $filter: ModelSubscriptionDishFilterInput
+    $owner: String
+  ) {
+    onCreateDish(filter: $filter, owner: $owner) {
       id
       name
       rating
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
 `;
 export const onUpdateDish = /* GraphQL */ `
-  subscription OnUpdateDish($filter: ModelSubscriptionDishFilterInput) {
-    onUpdateDish(filter: $filter) {
+  subscription OnUpdateDish(
+    $filter: ModelSubscriptionDishFilterInput
+    $owner: String
+  ) {
+    onUpdateDish(filter: $filter, owner: $owner) {
       id
       name
       rating
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
 `;
 export const onDeleteDish = /* GraphQL */ `
-  subscription OnDeleteDish($filter: ModelSubscriptionDishFilterInput) {
-    onDeleteDish(filter: $filter) {
+  subscription OnDeleteDish(
+    $filter: ModelSubscriptionDishFilterInput
+    $owner: String
+  ) {
+    onDeleteDish(filter: $filter, owner: $owner) {
       id
       name
       rating
       restaurantID
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
 `;
 export const onCreateNotes = /* GraphQL */ `
-  subscription OnCreateNotes($filter: ModelSubscriptionNotesFilterInput) {
-    onCreateNotes(filter: $filter) {
+  subscription OnCreateNotes(
+    $filter: ModelSubscriptionNotesFilterInput
+    $owner: String
+  ) {
+    onCreateNotes(filter: $filter, owner: $owner) {
       id
       note
       restaurantID
@@ -51,13 +66,17 @@ export const onCreateNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
 `;
 export const onUpdateNotes = /* GraphQL */ `
-  subscription OnUpdateNotes($filter: ModelSubscriptionNotesFilterInput) {
-    onUpdateNotes(filter: $filter) {
+  subscription OnUpdateNotes(
+    $filter: ModelSubscriptionNotesFilterInput
+    $owner: String
+  ) {
+    onUpdateNotes(filter: $filter, owner: $owner) {
       id
       note
       restaurantID
@@ -65,13 +84,17 @@ export const onUpdateNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
 `;
 export const onDeleteNotes = /* GraphQL */ `
-  subscription OnDeleteNotes($filter: ModelSubscriptionNotesFilterInput) {
-    onDeleteNotes(filter: $filter) {
+  subscription OnDeleteNotes(
+    $filter: ModelSubscriptionNotesFilterInput
+    $owner: String
+  ) {
+    onDeleteNotes(filter: $filter, owner: $owner) {
       id
       note
       restaurantID
@@ -79,6 +102,7 @@ export const onDeleteNotes = /* GraphQL */ `
       authorEmail
       createdAt
       updatedAt
+      owner
       __typename
     }
   }
