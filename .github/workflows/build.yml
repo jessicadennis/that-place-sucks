@@ -1,0 +1,15 @@
+name: Build the frontend
+on: [pull_request]
+
+jobs:
+  build:
+    name: "vite-build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "npm"
+      - run: |
+          npm ci
+          npm run build
