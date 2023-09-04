@@ -19,13 +19,20 @@ import {
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
-import {
-  getOverrideProps,
-  useDataStoreBinding,
-} from "@aws-amplify/ui-react/internal";
-import { Category, Restaurant, RestaurantCategory } from "../models";
+import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { fetchByPath, validateField } from "./utils";
-import { DataStore } from "aws-amplify";
+import {
+  getCategory,
+  listRestaurantCategories,
+  listRestaurants,
+  restaurantCategoriesByCategoryId,
+} from "../graphql/queries";
+import { API } from "aws-amplify";
+import {
+  createRestaurantCategory,
+  deleteRestaurantCategory,
+  updateCategory,
+} from "../graphql/mutations";
 function ArrayField({
   items = [],
   onChange,
@@ -38,6 +45,7 @@ function ArrayField({
   defaultFieldValue,
   lengthLimit,
   getBadgeText,
+  runValidationTasks,
   errorMessage,
 }) {
   const labelElement = <Text>{label}</Text>;
@@ -61,6 +69,7 @@ function ArrayField({
     setSelectedBadgeIndex(undefined);
   };
   const addItem = async () => {
+    const { hasError } = runValidationTasks();
     if (
       currentFieldValue !== undefined &&
       currentFieldValue !== null &&
@@ -170,12 +179,7 @@ function ArrayField({
               }}
             ></Button>
           )}
-          <Button
-            size="small"
-            variation="link"
-            isDisabled={hasError}
-            onClick={addItem}
-          >
+          <Button size="small" variation="link" onClick={addItem}>
             {selectedBadgeIndex !== undefined ? "Save" : "Add"}
           </Button>
         </Flex>
@@ -204,6 +208,9 @@ export default function CategoryUpdateForm(props) {
   const [restaurants, setRestaurants] = React.useState(
     initialValues.restaurants
   );
+  const [restaurantsLoading, setRestaurantsLoading] = React.useState(false);
+  const [restaurantsRecords, setRestaurantsRecords] = React.useState([]);
+  const autocompleteLength = 10;
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = categoryRecord
@@ -221,19 +228,25 @@ export default function CategoryUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(Category, idProp)
-        : categoryModelProp;
-      setCategoryRecord(record);
-      const linkedRestaurants = record
-        ? await Promise.all(
-            (
-              await record.restaurants.toArray()
-            ).map((r) => {
-              return r.restaurant;
+        ? (
+            await API.graphql({
+              query: getCategory,
+              variables: { id: idProp },
             })
-          )
+          )?.data?.getCategory
+        : categoryModelProp;
+      const linkedRestaurants = record
+        ? (
+            await API.graphql({
+              query: restaurantCategoriesByCategoryId,
+              variables: {
+                categoryId: record.id,
+              },
+            })
+          ).data.restaurantCategoriesByCategoryId.items.map((t) => t.restaurant)
         : [];
       setLinkedRestaurants(linkedRestaurants);
+      setCategoryRecord(record);
     };
     queryData();
   }, [idProp, categoryModelProp]);
@@ -251,10 +264,6 @@ export default function CategoryUpdateForm(props) {
       ? restaurants.map((r) => getIDValue.restaurants?.(r))
       : getIDValue.restaurants?.(restaurants)
   );
-  const restaurantRecords = useDataStoreBinding({
-    type: "collection",
-    model: Restaurant,
-  }).items;
   const getDisplayValue = {
     restaurants: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
@@ -279,6 +288,38 @@ export default function CategoryUpdateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const fetchRestaurantsRecords = async (value) => {
+    setRestaurantsLoading(true);
+    const newOptions = [];
+    let newNext = "";
+    while (newOptions.length < autocompleteLength && newNext != null) {
+      const variables = {
+        limit: autocompleteLength * 5,
+        filter: {
+          or: [{ name: { contains: value } }, { id: { contains: value } }],
+        },
+      };
+      if (newNext) {
+        variables["nextToken"] = newNext;
+      }
+      const result = (
+        await API.graphql({
+          query: listRestaurants,
+          variables,
+        })
+      )?.data?.listRestaurants?.items;
+      var loaded = result.filter(
+        (item) => !restaurantsIdSet.has(getIDValue.restaurants?.(item))
+      );
+      newOptions.push(...loaded);
+      newNext = result.nextToken;
+    }
+    setRestaurantsRecords(newOptions.slice(0, autocompleteLength));
+    setRestaurantsLoading(false);
+  };
+  React.useEffect(() => {
+    fetchRestaurantsRecords("");
+  }, []);
   return (
     <Grid
       as="form"
@@ -289,7 +330,7 @@ export default function CategoryUpdateForm(props) {
         event.preventDefault();
         let modelFields = {
           name,
-          restaurants,
+          restaurants: restaurants ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -323,8 +364,8 @@ export default function CategoryUpdateForm(props) {
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
-            if (typeof value === "string" && value.trim() === "") {
-              modelFields[key] = undefined;
+            if (typeof value === "string" && value === "") {
+              modelFields[key] = null;
             }
           });
           const promises = [];
@@ -366,33 +407,49 @@ export default function CategoryUpdateForm(props) {
           });
           restaurantsToUnLinkMap.forEach(async (count, id) => {
             const recordKeys = JSON.parse(id);
-            const restaurantCategoryRecords = await DataStore.query(
-              RestaurantCategory,
-              (r) =>
-                r.and((r) => {
-                  return [
-                    r.restaurantId.eq(recordKeys.id),
-                    r.categoryId.eq(categoryRecord.id),
-                  ];
-                })
-            );
+            const restaurantCategoryRecords = (
+              await API.graphql({
+                query: listRestaurantCategories,
+                variables: {
+                  filter: {
+                    and: [
+                      { restaurantId: { eq: recordKeys.id } },
+                      { categoryId: { eq: categoryRecord.id } },
+                    ],
+                  },
+                },
+              })
+            )?.data?.listRestaurantCategories?.items;
             for (let i = 0; i < count; i++) {
-              promises.push(DataStore.delete(restaurantCategoryRecords[i]));
+              promises.push(
+                API.graphql({
+                  query: deleteRestaurantCategory,
+                  variables: {
+                    input: {
+                      id: restaurantCategoryRecords[i].id,
+                    },
+                  },
+                })
+              );
             }
           });
           restaurantsToLinkMap.forEach((count, id) => {
+            const restaurantToLink = restaurantRecords.find((r) =>
+              Object.entries(JSON.parse(id)).every(
+                ([key, value]) => r[key] === value
+              )
+            );
             for (let i = count; i > 0; i--) {
               promises.push(
-                DataStore.save(
-                  new RestaurantCategory({
-                    category: categoryRecord,
-                    restaurant: restaurantRecords.find((r) =>
-                      Object.entries(JSON.parse(id)).every(
-                        ([key, value]) => r[key] === value
-                      )
-                    ),
-                  })
-                )
+                API.graphql({
+                  query: createRestaurantCategory,
+                  variables: {
+                    input: {
+                      categoryId: categoryRecord.id,
+                      restaurantId: restaurantToLink.id,
+                    },
+                  },
+                })
               );
             }
           });
@@ -400,11 +457,15 @@ export default function CategoryUpdateForm(props) {
             name: modelFields.name,
           };
           promises.push(
-            DataStore.save(
-              Category.copyOf(categoryRecord, (updated) => {
-                Object.assign(updated, modelFieldsToSave);
-              })
-            )
+            API.graphql({
+              query: updateCategory,
+              variables: {
+                input: {
+                  id: categoryRecord.id,
+                  ...modelFieldsToSave,
+                },
+              },
+            })
           );
           await Promise.all(promises);
           if (onSuccess) {
@@ -412,7 +473,8 @@ export default function CategoryUpdateForm(props) {
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
@@ -463,6 +525,9 @@ export default function CategoryUpdateForm(props) {
         label={"Restaurants"}
         items={restaurants}
         hasError={errors?.restaurants?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("restaurants", currentRestaurantsValue)
+        }
         errorMessage={errors?.restaurants?.errorMessage}
         getBadgeText={getDisplayValue.restaurants}
         setFieldValue={(model) => {
@@ -480,15 +545,14 @@ export default function CategoryUpdateForm(props) {
           isReadOnly={false}
           placeholder="Search Restaurant"
           value={currentRestaurantsDisplayValue}
-          options={restaurantRecords
-            .filter((r) => !restaurantsIdSet.has(getIDValue.restaurants?.(r)))
-            .map((r) => ({
-              id: getIDValue.restaurants?.(r),
-              label: getDisplayValue.restaurants?.(r),
-            }))}
+          options={restaurantsRecords.map((r) => ({
+            id: getIDValue.restaurants?.(r),
+            label: getDisplayValue.restaurants?.(r),
+          }))}
+          isLoading={restaurantsLoading}
           onSelect={({ id, label }) => {
             setCurrentRestaurantsValue(
-              restaurantRecords.find((r) =>
+              restaurantsRecords.find((r) =>
                 Object.entries(JSON.parse(id)).every(
                   ([key, value]) => r[key] === value
                 )
@@ -502,6 +566,7 @@ export default function CategoryUpdateForm(props) {
           }}
           onChange={(e) => {
             let { value } = e.target;
+            fetchRestaurantsRecords(value);
             if (errors.restaurants?.hasError) {
               runValidationTasks("restaurants", value);
             }

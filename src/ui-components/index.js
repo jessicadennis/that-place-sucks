@@ -6,6 +6,8 @@
 
 export { default as CategoryCreateForm } from "./CategoryCreateForm";
 export { default as CategoryUpdateForm } from "./CategoryUpdateForm";
+export { default as DishCreateForm } from "./DishCreateForm";
+export { default as DishUpdateForm } from "./DishUpdateForm";
 export { default as NotesCreateForm } from "./NotesCreateForm";
 export { default as NotesUpdateForm } from "./NotesUpdateForm";
 export { default as RestaurantCreateForm } from "./RestaurantCreateForm";
