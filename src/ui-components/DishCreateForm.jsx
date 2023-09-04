@@ -23,7 +23,7 @@ import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { fetchByPath, validateField } from "./utils";
 import { API } from "aws-amplify";
 import { listRestaurants } from "../graphql/queries";
-import { createNotes } from "../graphql/mutations";
+import { createDish } from "../graphql/mutations";
 function ArrayField({
   items = [],
   onChange,
@@ -179,7 +179,7 @@ function ArrayField({
     </React.Fragment>
   );
 }
-export default function NotesCreateForm(props) {
+export default function DishCreateForm(props) {
   const {
     clearOnSuccess = true,
     onSuccess,
@@ -191,12 +191,12 @@ export default function NotesCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    note: "",
+    name: "",
+    rating: "",
     restaurantID: undefined,
-    author: "",
-    authorEmail: "",
   };
-  const [note, setNote] = React.useState(initialValues.note);
+  const [name, setName] = React.useState(initialValues.name);
+  const [rating, setRating] = React.useState(initialValues.rating);
   const [restaurantID, setRestaurantID] = React.useState(
     initialValues.restaurantID
   );
@@ -204,19 +204,14 @@ export default function NotesCreateForm(props) {
   const [restaurantIDRecords, setRestaurantIDRecords] = React.useState([]);
   const [selectedRestaurantIDRecords, setSelectedRestaurantIDRecords] =
     React.useState([]);
-  const [author, setAuthor] = React.useState(initialValues.author);
-  const [authorEmail, setAuthorEmail] = React.useState(
-    initialValues.authorEmail
-  );
   const autocompleteLength = 10;
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setNote(initialValues.note);
+    setName(initialValues.name);
+    setRating(initialValues.rating);
     setRestaurantID(initialValues.restaurantID);
     setCurrentRestaurantIDValue(undefined);
     setCurrentRestaurantIDDisplayValue("");
-    setAuthor(initialValues.author);
-    setAuthorEmail(initialValues.authorEmail);
     setErrors({});
   };
   const [currentRestaurantIDDisplayValue, setCurrentRestaurantIDDisplayValue] =
@@ -228,10 +223,9 @@ export default function NotesCreateForm(props) {
     restaurantID: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
   const validations = {
-    note: [{ type: "Required" }],
+    name: [{ type: "Required" }],
+    rating: [{ type: "Required" }],
     restaurantID: [{ type: "Required" }],
-    author: [{ type: "Required" }],
-    authorEmail: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -289,10 +283,9 @@ export default function NotesCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          note,
+          name,
+          rating,
           restaurantID,
-          author,
-          authorEmail,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -323,7 +316,7 @@ export default function NotesCreateForm(props) {
             }
           });
           await API.graphql({
-            query: createNotes,
+            query: createDish,
             variables: {
               input: {
                 ...modelFields,
@@ -343,35 +336,64 @@ export default function NotesCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "NotesCreateForm")}
+      {...getOverrideProps(overrides, "DishCreateForm")}
       {...rest}
     >
       <TextField
-        label="Note"
+        label="Name"
         isRequired={true}
         isReadOnly={false}
-        value={note}
+        value={name}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              note: value,
+              name: value,
+              rating,
               restaurantID,
-              author,
-              authorEmail,
             };
             const result = onChange(modelFields);
-            value = result?.note ?? value;
+            value = result?.name ?? value;
           }
-          if (errors.note?.hasError) {
-            runValidationTasks("note", value);
+          if (errors.name?.hasError) {
+            runValidationTasks("name", value);
           }
-          setNote(value);
+          setName(value);
         }}
-        onBlur={() => runValidationTasks("note", note)}
-        errorMessage={errors.note?.errorMessage}
-        hasError={errors.note?.hasError}
-        {...getOverrideProps(overrides, "note")}
+        onBlur={() => runValidationTasks("name", name)}
+        errorMessage={errors.name?.errorMessage}
+        hasError={errors.name?.hasError}
+        {...getOverrideProps(overrides, "name")}
+      ></TextField>
+      <TextField
+        label="Rating"
+        isRequired={true}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={rating}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              rating: value,
+              restaurantID,
+            };
+            const result = onChange(modelFields);
+            value = result?.rating ?? value;
+          }
+          if (errors.rating?.hasError) {
+            runValidationTasks("rating", value);
+          }
+          setRating(value);
+        }}
+        onBlur={() => runValidationTasks("rating", rating)}
+        errorMessage={errors.rating?.errorMessage}
+        hasError={errors.rating?.hasError}
+        {...getOverrideProps(overrides, "rating")}
       ></TextField>
       <ArrayField
         lengthLimit={1}
@@ -379,10 +401,9 @@ export default function NotesCreateForm(props) {
           let value = items[0];
           if (onChange) {
             const modelFields = {
-              note,
+              name,
+              rating,
               restaurantID: value,
-              author,
-              authorEmail,
             };
             const result = onChange(modelFields);
             value = result?.restaurantID ?? value;
@@ -469,60 +490,6 @@ export default function NotesCreateForm(props) {
           {...getOverrideProps(overrides, "restaurantID")}
         ></Autocomplete>
       </ArrayField>
-      <TextField
-        label="Author"
-        isRequired={true}
-        isReadOnly={false}
-        value={author}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              note,
-              restaurantID,
-              author: value,
-              authorEmail,
-            };
-            const result = onChange(modelFields);
-            value = result?.author ?? value;
-          }
-          if (errors.author?.hasError) {
-            runValidationTasks("author", value);
-          }
-          setAuthor(value);
-        }}
-        onBlur={() => runValidationTasks("author", author)}
-        errorMessage={errors.author?.errorMessage}
-        hasError={errors.author?.hasError}
-        {...getOverrideProps(overrides, "author")}
-      ></TextField>
-      <TextField
-        label="Author email"
-        isRequired={true}
-        isReadOnly={false}
-        value={authorEmail}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              note,
-              restaurantID,
-              author,
-              authorEmail: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.authorEmail ?? value;
-          }
-          if (errors.authorEmail?.hasError) {
-            runValidationTasks("authorEmail", value);
-          }
-          setAuthorEmail(value);
-        }}
-        onBlur={() => runValidationTasks("authorEmail", authorEmail)}
-        errorMessage={errors.authorEmail?.errorMessage}
-        hasError={errors.authorEmail?.hasError}
-        {...getOverrideProps(overrides, "authorEmail")}
-      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

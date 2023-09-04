@@ -6,10 +6,12 @@ import { NavLink } from "react-router-dom";
 export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
   const pages = [
     {
+      id: 0,
       name: "Home",
       route: "/",
     },
     {
+      id: 1,
       name: "Add a place",
       route: "/add",
     },
@@ -56,7 +58,7 @@ export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
             </li>
             {pages.map((page) => (
               <li
-                key={crypto.randomUUID()}
+                key={page.id}
                 className="nav-item">
                 <NavLink
                   to={page.route}

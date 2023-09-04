@@ -1,22 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GraphQLResult } from "@aws-amplify/api-graphql";
-import { ColumnDef, Row } from "@tanstack/react-table";
-import { API, Amplify } from "aws-amplify";
-import { useMemo, useState } from "react";
-import { useQuery } from "react-query";
-import { Link, NavLink } from "react-router-dom";
-import awsconfig from "../aws-exports";
-import { Notes } from "../models";
-import Table from "./Table";
-import { useDebounce } from "use-debounce";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPenToSquare,
   faPizzaSlice,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ColumnDef, Row } from "@tanstack/react-table";
+import { API, Amplify } from "aws-amplify";
+import { useMemo, useState } from "react";
+import { useQuery } from "react-query";
+import { Link, NavLink } from "react-router-dom";
+import { useDebounce } from "use-debounce";
+import awsconfig from "../aws-exports";
 import { getAllRestaurants } from "../graphql/custom-queries";
+import { Notes } from "../models";
+import utils from "../utilities/format-utils";
 import SpinnerOverlay from "./SpinnerOverlay";
+import Table from "./Table";
 
 interface RestaurantRow {
   name: string;
@@ -29,16 +30,6 @@ interface RestaurantRow {
 }
 
 Amplify.configure(awsconfig);
-
-function formatDate(dateString: string) {
-  try {
-    const date = new Date(dateString);
-    return Intl.DateTimeFormat("en-US").format(date);
-  } catch (error) {
-    console.log(`error parsing date: ${dateString}`);
-    return "";
-  }
-}
 
 export default function PlacesTable() {
   const [search, setSearch] = useState("");
@@ -61,7 +52,7 @@ export default function PlacesTable() {
       category: place.categories?.items[0]?.category?.name,
       noteCount: place.notes?.items?.length,
       notes: place.notes?.items ?? [],
-      updatedAt: formatDate(place?.updatedAt ?? ""),
+      updatedAt: utils.formatDate(place?.updatedAt ?? ""),
       id: place.id,
     }));
 

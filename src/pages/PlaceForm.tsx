@@ -27,7 +27,7 @@ import { listCategories } from "../graphql/queries.js";
 import { restaurantCategoriesByRestaurantId } from "../graphql/queries.ts";
 import { Category, Dish, Notes } from "../models";
 import DishesForm from "../components/DishesForm.tsx";
-import UserInfo from "../utilities/user-info.ts";
+import userInfo from "../utilities/user-info.ts";
 import { Toast, ToastContainer } from "react-bootstrap";
 import { ToastPosition } from "react-bootstrap/esm/ToastContainer";
 
@@ -176,8 +176,8 @@ async function editRestaurant(input: RestauarntMutationInput) {
   await Promise.all(promises);
 }
 
-const userGroups = new UserInfo();
-const canAddCategories = await userGroups.getIsAdminOrSuperUser();
+let canAddCategories = false;
+userInfo.isAdminOrSuperUser.subscribe((result) => (canAddCategories = result));
 
 function PlaceForm({ user }: WithAuthenticatorProps) {
   const [name, setName] = useState("");
@@ -198,7 +198,7 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const title = restaurantId ? "Add a Place" : "Edit Place";
+  const title = restaurantId ? `Edit ${name}` : "Add a Place";
 
   const catQuery = useQuery("categories", getCategories) as any;
   const categories = catQuery?.data?.listCategories?.items ?? [];

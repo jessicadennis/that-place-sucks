@@ -19,13 +19,11 @@ import {
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
-import {
-  getOverrideProps,
-  useDataStoreBinding,
-} from "@aws-amplify/ui-react/internal";
-import { Notes, Restaurant } from "../models";
+import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { fetchByPath, validateField } from "./utils";
-import { DataStore } from "aws-amplify";
+import { API } from "aws-amplify";
+import { getNotes, getRestaurant, listRestaurants } from "../graphql/queries";
+import { updateNotes } from "../graphql/mutations";
 function ArrayField({
   items = [],
   onChange,
@@ -38,6 +36,7 @@ function ArrayField({
   defaultFieldValue,
   lengthLimit,
   getBadgeText,
+  runValidationTasks,
   errorMessage,
 }) {
   const labelElement = <Text>{label}</Text>;
@@ -61,6 +60,7 @@ function ArrayField({
     setSelectedBadgeIndex(undefined);
   };
   const addItem = async () => {
+    const { hasError } = runValidationTasks();
     if (
       currentFieldValue !== undefined &&
       currentFieldValue !== null &&
@@ -170,12 +170,7 @@ function ArrayField({
               }}
             ></Button>
           )}
-          <Button
-            size="small"
-            variation="link"
-            isDisabled={hasError}
-            onClick={addItem}
-          >
+          <Button size="small" variation="link" onClick={addItem}>
             {selectedBadgeIndex !== undefined ? "Save" : "Add"}
           </Button>
         </Flex>
@@ -206,10 +201,15 @@ export default function NotesUpdateForm(props) {
   const [restaurantID, setRestaurantID] = React.useState(
     initialValues.restaurantID
   );
+  const [restaurantIDLoading, setRestaurantIDLoading] = React.useState(false);
+  const [restaurantIDRecords, setRestaurantIDRecords] = React.useState([]);
+  const [selectedRestaurantIDRecords, setSelectedRestaurantIDRecords] =
+    React.useState([]);
   const [author, setAuthor] = React.useState(initialValues.author);
   const [authorEmail, setAuthorEmail] = React.useState(
     initialValues.authorEmail
   );
+  const autocompleteLength = 10;
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = notesRecord
@@ -227,11 +227,25 @@ export default function NotesUpdateForm(props) {
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(Notes, idProp)
+        ? (
+            await API.graphql({
+              query: getNotes,
+              variables: { id: idProp },
+            })
+          )?.data?.getNotes
         : notesModelProp;
-      setNotesRecord(record);
-      const restaurantIDRecord = record ? await record.restaurantID : undefined;
+      const restaurantIDRecord = record ? record.restaurantID : undefined;
+      const restaurantRecord = restaurantIDRecord
+        ? (
+            await API.graphql({
+              query: getRestaurant,
+              variables: { id: restaurantIDRecord },
+            })
+          )?.data?.getRestaurant
+        : undefined;
       setRestaurantID(restaurantIDRecord);
+      setSelectedRestaurantIDRecords([restaurantRecord]);
+      setNotesRecord(record);
     };
     queryData();
   }, [idProp, notesModelProp]);
@@ -241,10 +255,6 @@ export default function NotesUpdateForm(props) {
   const [currentRestaurantIDValue, setCurrentRestaurantIDValue] =
     React.useState(undefined);
   const restaurantIDRef = React.createRef();
-  const restaurantRecords = useDataStoreBinding({
-    type: "collection",
-    model: Restaurant,
-  }).items;
   const getDisplayValue = {
     restaurantID: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
@@ -271,6 +281,36 @@ export default function NotesUpdateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const fetchRestaurantIDRecords = async (value) => {
+    setRestaurantIDLoading(true);
+    const newOptions = [];
+    let newNext = "";
+    while (newOptions.length < autocompleteLength && newNext != null) {
+      const variables = {
+        limit: autocompleteLength * 5,
+        filter: {
+          or: [{ name: { contains: value } }, { id: { contains: value } }],
+        },
+      };
+      if (newNext) {
+        variables["nextToken"] = newNext;
+      }
+      const result = (
+        await API.graphql({
+          query: listRestaurants,
+          variables,
+        })
+      )?.data?.listRestaurants?.items;
+      var loaded = result.filter((item) => restaurantID !== item.id);
+      newOptions.push(...loaded);
+      newNext = result.nextToken;
+    }
+    setRestaurantIDRecords(newOptions.slice(0, autocompleteLength));
+    setRestaurantIDLoading(false);
+  };
+  React.useEffect(() => {
+    fetchRestaurantIDRecords("");
+  }, []);
   return (
     <Grid
       as="form"
@@ -309,21 +349,26 @@ export default function NotesUpdateForm(props) {
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
-            if (typeof value === "string" && value.trim() === "") {
-              modelFields[key] = undefined;
+            if (typeof value === "string" && value === "") {
+              modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            Notes.copyOf(notesRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
-          );
+          await API.graphql({
+            query: updateNotes,
+            variables: {
+              input: {
+                id: notesRecord.id,
+                ...modelFields,
+              },
+            },
+          });
           if (onSuccess) {
             onSuccess(modelFields);
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
@@ -378,11 +423,15 @@ export default function NotesUpdateForm(props) {
         label={"Restaurant id"}
         items={restaurantID ? [restaurantID] : []}
         hasError={errors?.restaurantID?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("restaurantID", currentRestaurantIDValue)
+        }
         errorMessage={errors?.restaurantID?.errorMessage}
         getBadgeText={(value) =>
           value
             ? getDisplayValue.restaurantID(
-                restaurantRecords.find((r) => r.id === value)
+                restaurantIDRecords.find((r) => r.id === value) ??
+                  selectedRestaurantIDRecords.find((r) => r.id === value)
               )
             : ""
         }
@@ -390,11 +439,18 @@ export default function NotesUpdateForm(props) {
           setCurrentRestaurantIDDisplayValue(
             value
               ? getDisplayValue.restaurantID(
-                  restaurantRecords.find((r) => r.id === value)
+                  restaurantIDRecords.find((r) => r.id === value) ??
+                    selectedRestaurantIDRecords.find((r) => r.id === value)
                 )
               : ""
           );
           setCurrentRestaurantIDValue(value);
+          const selectedRecord = restaurantIDRecords.find(
+            (r) => r.id === value
+          );
+          if (selectedRecord) {
+            setSelectedRestaurantIDRecords([selectedRecord]);
+          }
         }}
         inputFieldRef={restaurantIDRef}
         defaultFieldValue={""}
@@ -405,7 +461,7 @@ export default function NotesUpdateForm(props) {
           isReadOnly={false}
           placeholder="Search Restaurant"
           value={currentRestaurantIDDisplayValue}
-          options={restaurantRecords
+          options={restaurantIDRecords
             .filter(
               (r, i, arr) =>
                 arr.findIndex((member) => member?.id === r?.id) === i
@@ -414,6 +470,7 @@ export default function NotesUpdateForm(props) {
               id: r?.id,
               label: getDisplayValue.restaurantID?.(r),
             }))}
+          isLoading={restaurantIDLoading}
           onSelect={({ id, label }) => {
             setCurrentRestaurantIDValue(id);
             setCurrentRestaurantIDDisplayValue(label);
@@ -425,6 +482,7 @@ export default function NotesUpdateForm(props) {
           defaultValue={restaurantID}
           onChange={(e) => {
             let { value } = e.target;
+            fetchRestaurantIDRecords(value);
             if (errors.restaurantID?.hasError) {
               runValidationTasks("restaurantID", value);
             }

@@ -7,34 +7,36 @@
 import * as React from "react";
 import { AutocompleteProps, GridProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { EscapeHatchProps } from "@aws-amplify/ui-react/internal";
-import { Restaurant } from "../API.ts";
 export declare type ValidationResponse = {
     hasError: boolean;
     errorMessage?: string;
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
-export declare type CategoryCreateFormInputValues = {
+export declare type DishCreateFormInputValues = {
     name?: string;
-    restaurants?: Restaurant[];
+    rating?: number;
+    restaurantID?: string;
 };
-export declare type CategoryCreateFormValidationValues = {
+export declare type DishCreateFormValidationValues = {
     name?: ValidationFunction<string>;
-    restaurants?: ValidationFunction<Restaurant>;
+    rating?: ValidationFunction<number>;
+    restaurantID?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
-export declare type CategoryCreateFormOverridesProps = {
-    CategoryCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
+export declare type DishCreateFormOverridesProps = {
+    DishCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
-    restaurants?: PrimitiveOverrideProps<AutocompleteProps>;
+    rating?: PrimitiveOverrideProps<TextFieldProps>;
+    restaurantID?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
-export declare type CategoryCreateFormProps = React.PropsWithChildren<{
-    overrides?: CategoryCreateFormOverridesProps | undefined | null;
+export declare type DishCreateFormProps = React.PropsWithChildren<{
+    overrides?: DishCreateFormOverridesProps | undefined | null;
 } & {
     clearOnSuccess?: boolean;
-    onSubmit?: (fields: CategoryCreateFormInputValues) => CategoryCreateFormInputValues;
-    onSuccess?: (fields: CategoryCreateFormInputValues) => void;
-    onError?: (fields: CategoryCreateFormInputValues, errorMessage: string) => void;
-    onChange?: (fields: CategoryCreateFormInputValues) => CategoryCreateFormInputValues;
-    onValidate?: CategoryCreateFormValidationValues;
+    onSubmit?: (fields: DishCreateFormInputValues) => DishCreateFormInputValues;
+    onSuccess?: (fields: DishCreateFormInputValues) => void;
+    onError?: (fields: DishCreateFormInputValues, errorMessage: string) => void;
+    onChange?: (fields: DishCreateFormInputValues) => DishCreateFormInputValues;
+    onValidate?: DishCreateFormValidationValues;
 } & React.CSSProperties>;
-export default function CategoryCreateForm(props: CategoryCreateFormProps): React.ReactElement;
+export default function DishCreateForm(props: DishCreateFormProps): React.ReactElement;

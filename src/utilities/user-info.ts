@@ -1,4 +1,5 @@
 import { Auth } from "aws-amplify";
+import { Observable, from, map } from "rxjs";
 
 export enum Groups {
   Admin = "admin",
@@ -6,34 +7,40 @@ export enum Groups {
   User = "user",
 }
 
-export default class UserInfo {
-  async getUserGroups() {
-    const groups = await this.getUser();
-    return (
-      groups.getSignInUserSession().getAccessToken().payload[
-        "cognito:groups"
-      ] ?? []
+const userInfo$ = from(Auth.currentAuthenticatedUser());
+
+export default {
+  get user(): Observable<any> {
+    return userInfo$;
+  },
+
+  get userGroups(): Observable<string[]> {
+    return userInfo$.pipe(
+      map(
+        (info) =>
+          info.getSignInUserSession()?.getAccessToken()?.payload[
+            "cognito:groups"
+          ]
+      ) ?? []
     );
-  }
+  },
 
-  async getISuperUser() {
-    const groups = await this.getUserGroups();
-    return groups.includes(Groups.SuperUser);
-  }
+  get isSuperUser(): Observable<boolean> {
+    return this.userGroups.pipe(
+      map((groups) => groups.includes(Groups.SuperUser))
+    );
+  },
 
-  async getIsAdmin() {
-    const groups = await this.getUserGroups();
-    return groups.includes(Groups.Admin);
-  }
+  get isAdmin(): Observable<boolean> {
+    return this.userGroups.pipe(map((groups) => groups.includes(Groups.Admin)));
+  },
 
-  async getIsAdminOrSuperUser() {
-    const isAdmin = await this.getIsAdmin();
-    const isSU = await this.getISuperUser();
-    return isAdmin || isSU;
-  }
-
-  async getUser() {
-    const user = await Auth.currentAuthenticatedUser();
-    return user;
-  }
-}
+  get isAdminOrSuperUser(): Observable<boolean> {
+    return this.userGroups.pipe(
+      map(
+        (groups) =>
+          groups.includes(Groups.SuperUser) || groups.includes(Groups.Admin)
+      )
+    );
+  },
+};

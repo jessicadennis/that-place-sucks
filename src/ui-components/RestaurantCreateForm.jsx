@@ -19,13 +19,17 @@ import {
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
-import {
-  getOverrideProps,
-  useDataStoreBinding,
-} from "@aws-amplify/ui-react/internal";
-import { Restaurant, Notes, Category, RestaurantCategory } from "../models";
+import { getOverrideProps } from "@aws-amplify/ui-react/internal";
+import { Category } from "../API.ts";
 import { fetchByPath, validateField } from "./utils";
-import { DataStore } from "aws-amplify";
+import { API } from "aws-amplify";
+import { listCategories, listDishes, listNotes } from "../graphql/queries";
+import {
+  createRestaurant,
+  createRestaurantCategory,
+  updateDish,
+  updateNotes,
+} from "../graphql/mutations";
 function ArrayField({
   items = [],
   onChange,
@@ -38,6 +42,7 @@ function ArrayField({
   defaultFieldValue,
   lengthLimit,
   getBadgeText,
+  runValidationTasks,
   errorMessage,
 }) {
   const labelElement = <Text>{label}</Text>;
@@ -61,6 +66,7 @@ function ArrayField({
     setSelectedBadgeIndex(undefined);
   };
   const addItem = async () => {
+    const { hasError } = runValidationTasks();
     if (
       currentFieldValue !== undefined &&
       currentFieldValue !== null &&
@@ -170,12 +176,7 @@ function ArrayField({
               }}
             ></Button>
           )}
-          <Button
-            size="small"
-            variation="link"
-            isDisabled={hasError}
-            onClick={addItem}
-          >
+          <Button size="small" variation="link" onClick={addItem}>
             {selectedBadgeIndex !== undefined ? "Save" : "Add"}
           </Button>
         </Flex>
@@ -200,11 +201,20 @@ export default function RestaurantCreateForm(props) {
     rating: "",
     notes: [],
     categories: [],
+    dishes: [],
   };
   const [name, setName] = React.useState(initialValues.name);
   const [rating, setRating] = React.useState(initialValues.rating);
   const [notes, setNotes] = React.useState(initialValues.notes);
+  const [notesLoading, setNotesLoading] = React.useState(false);
+  const [notesRecords, setNotesRecords] = React.useState([]);
   const [categories, setCategories] = React.useState(initialValues.categories);
+  const [categoriesLoading, setCategoriesLoading] = React.useState(false);
+  const [categoriesRecords, setCategoriesRecords] = React.useState([]);
+  const [dishes, setDishes] = React.useState(initialValues.dishes);
+  const [dishesLoading, setDishesLoading] = React.useState(false);
+  const [dishesRecords, setDishesRecords] = React.useState([]);
+  const autocompleteLength = 10;
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
@@ -215,6 +225,9 @@ export default function RestaurantCreateForm(props) {
     setCategories(initialValues.categories);
     setCurrentCategoriesValue(undefined);
     setCurrentCategoriesDisplayValue("");
+    setDishes(initialValues.dishes);
+    setCurrentDishesValue(undefined);
+    setCurrentDishesDisplayValue("");
     setErrors({});
   };
   const [currentNotesDisplayValue, setCurrentNotesDisplayValue] =
@@ -226,9 +239,14 @@ export default function RestaurantCreateForm(props) {
   const [currentCategoriesValue, setCurrentCategoriesValue] =
     React.useState(undefined);
   const categoriesRef = React.createRef();
+  const [currentDishesDisplayValue, setCurrentDishesDisplayValue] =
+    React.useState("");
+  const [currentDishesValue, setCurrentDishesValue] = React.useState(undefined);
+  const dishesRef = React.createRef();
   const getIDValue = {
     notes: (r) => JSON.stringify({ id: r?.id }),
     categories: (r) => JSON.stringify({ id: r?.id }),
+    dishes: (r) => JSON.stringify({ id: r?.id }),
   };
   const notesIdSet = new Set(
     Array.isArray(notes)
@@ -240,23 +258,22 @@ export default function RestaurantCreateForm(props) {
       ? categories.map((r) => getIDValue.categories?.(r))
       : getIDValue.categories?.(categories)
   );
-  const notesRecords = useDataStoreBinding({
-    type: "collection",
-    model: Notes,
-  }).items;
-  const categoryRecords = useDataStoreBinding({
-    type: "collection",
-    model: Category,
-  }).items;
+  const dishesIdSet = new Set(
+    Array.isArray(dishes)
+      ? dishes.map((r) => getIDValue.dishes?.(r))
+      : getIDValue.dishes?.(dishes)
+  );
   const getDisplayValue = {
     notes: (r) => `${r?.note ? r?.note + " - " : ""}${r?.id}`,
     categories: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
+    dishes: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
   };
   const validations = {
     name: [{ type: "Required" }],
     rating: [{ type: "Required" }],
     notes: [],
     categories: [],
+    dishes: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -275,6 +292,98 @@ export default function RestaurantCreateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const fetchNotesRecords = async (value) => {
+    setNotesLoading(true);
+    const newOptions = [];
+    let newNext = "";
+    while (newOptions.length < autocompleteLength && newNext != null) {
+      const variables = {
+        limit: autocompleteLength * 5,
+        filter: {
+          or: [{ note: { contains: value } }, { id: { contains: value } }],
+        },
+      };
+      if (newNext) {
+        variables["nextToken"] = newNext;
+      }
+      const result = (
+        await API.graphql({
+          query: listNotes,
+          variables,
+        })
+      )?.data?.listNotes?.items;
+      var loaded = result.filter(
+        (item) => !notesIdSet.has(getIDValue.notes?.(item))
+      );
+      newOptions.push(...loaded);
+      newNext = result.nextToken;
+    }
+    setNotesRecords(newOptions.slice(0, autocompleteLength));
+    setNotesLoading(false);
+  };
+  const fetchCategoriesRecords = async (value) => {
+    setCategoriesLoading(true);
+    const newOptions = [];
+    let newNext = "";
+    while (newOptions.length < autocompleteLength && newNext != null) {
+      const variables = {
+        limit: autocompleteLength * 5,
+        filter: {
+          or: [{ name: { contains: value } }, { id: { contains: value } }],
+        },
+      };
+      if (newNext) {
+        variables["nextToken"] = newNext;
+      }
+      const result = (
+        await API.graphql({
+          query: listCategories,
+          variables,
+        })
+      )?.data?.listCategories?.items;
+      var loaded = result.filter(
+        (item) => !categoriesIdSet.has(getIDValue.categories?.(item))
+      );
+      newOptions.push(...loaded);
+      newNext = result.nextToken;
+    }
+    setCategoriesRecords(newOptions.slice(0, autocompleteLength));
+    setCategoriesLoading(false);
+  };
+  const fetchDishesRecords = async (value) => {
+    setDishesLoading(true);
+    const newOptions = [];
+    let newNext = "";
+    while (newOptions.length < autocompleteLength && newNext != null) {
+      const variables = {
+        limit: autocompleteLength * 5,
+        filter: {
+          or: [{ name: { contains: value } }, { id: { contains: value } }],
+        },
+      };
+      if (newNext) {
+        variables["nextToken"] = newNext;
+      }
+      const result = (
+        await API.graphql({
+          query: listDishes,
+          variables,
+        })
+      )?.data?.listDishes?.items;
+      var loaded = result.filter(
+        (item) => !dishesIdSet.has(getIDValue.dishes?.(item))
+      );
+      newOptions.push(...loaded);
+      newNext = result.nextToken;
+    }
+    setDishesRecords(newOptions.slice(0, autocompleteLength));
+    setDishesLoading(false);
+  };
+  React.useEffect(() => {
+    fetchNotesRecords("");
+    fetchCategoriesRecords("");
+    fetchDishesRecords("");
+  }, []);
   return (
     <Grid
       as="form"
@@ -288,6 +397,7 @@ export default function RestaurantCreateForm(props) {
           rating,
           notes,
           categories,
+          dishes,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -321,26 +431,37 @@ export default function RestaurantCreateForm(props) {
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
-            if (typeof value === "string" && value.trim() === "") {
-              modelFields[key] = undefined;
+            if (typeof value === "string" && value === "") {
+              modelFields[key] = null;
             }
           });
           const modelFieldsToSave = {
             name: modelFields.name,
             rating: modelFields.rating,
           };
-          const restaurant = await DataStore.save(
-            new Restaurant(modelFieldsToSave)
-          );
+          const restaurant = (
+            await API.graphql({
+              query: createRestaurant,
+              variables: {
+                input: {
+                  ...modelFieldsToSave,
+                },
+              },
+            })
+          )?.data?.createRestaurant;
           const promises = [];
           promises.push(
             ...notes.reduce((promises, original) => {
               promises.push(
-                DataStore.save(
-                  Notes.copyOf(original, (updated) => {
-                    updated.restaurantID = restaurant.id;
-                  })
-                )
+                API.graphql({
+                  query: updateNotes,
+                  variables: {
+                    input: {
+                      id: original.id,
+                      restaurantID: restaurant.id,
+                    },
+                  },
+                })
               );
               return promises;
             }, [])
@@ -348,12 +469,31 @@ export default function RestaurantCreateForm(props) {
           promises.push(
             ...categories.reduce((promises, category) => {
               promises.push(
-                DataStore.save(
-                  new RestaurantCategory({
-                    restaurant,
-                    category,
-                  })
-                )
+                API.graphql({
+                  query: createRestaurantCategory,
+                  variables: {
+                    input: {
+                      restaurantId: restaurant.id,
+                      categoryId: Category.id,
+                    },
+                  },
+                })
+              );
+              return promises;
+            }, [])
+          );
+          promises.push(
+            ...dishes.reduce((promises, original) => {
+              promises.push(
+                API.graphql({
+                  query: updateDish,
+                  variables: {
+                    input: {
+                      id: original.id,
+                      restaurantID: restaurant.id,
+                    },
+                  },
+                })
               );
               return promises;
             }, [])
@@ -367,7 +507,8 @@ export default function RestaurantCreateForm(props) {
           }
         } catch (err) {
           if (onError) {
-            onError(modelFields, err.message);
+            const messages = err.errors.map((e) => e.message).join("\n");
+            onError(modelFields, messages);
           }
         }
       }}
@@ -387,6 +528,7 @@ export default function RestaurantCreateForm(props) {
               rating,
               notes,
               categories,
+              dishes,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -418,6 +560,7 @@ export default function RestaurantCreateForm(props) {
               rating: value,
               notes,
               categories,
+              dishes,
             };
             const result = onChange(modelFields);
             value = result?.rating ?? value;
@@ -441,6 +584,7 @@ export default function RestaurantCreateForm(props) {
               rating,
               notes: values,
               categories,
+              dishes,
             };
             const result = onChange(modelFields);
             values = result?.notes ?? values;
@@ -453,6 +597,9 @@ export default function RestaurantCreateForm(props) {
         label={"Notes"}
         items={notes}
         hasError={errors?.notes?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("notes", currentNotesValue)
+        }
         errorMessage={errors?.notes?.errorMessage}
         getBadgeText={getDisplayValue.notes}
         setFieldValue={(model) => {
@@ -476,6 +623,7 @@ export default function RestaurantCreateForm(props) {
               id: getIDValue.notes?.(r),
               label: getDisplayValue.notes?.(r),
             }))}
+          isLoading={notesLoading}
           onSelect={({ id, label }) => {
             setCurrentNotesValue(
               notesRecords.find((r) =>
@@ -492,6 +640,7 @@ export default function RestaurantCreateForm(props) {
           }}
           onChange={(e) => {
             let { value } = e.target;
+            fetchNotesRecords(value);
             if (errors.notes?.hasError) {
               runValidationTasks("notes", value);
             }
@@ -515,6 +664,7 @@ export default function RestaurantCreateForm(props) {
               rating,
               notes,
               categories: values,
+              dishes,
             };
             const result = onChange(modelFields);
             values = result?.categories ?? values;
@@ -527,6 +677,9 @@ export default function RestaurantCreateForm(props) {
         label={"Categories"}
         items={categories}
         hasError={errors?.categories?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("categories", currentCategoriesValue)
+        }
         errorMessage={errors?.categories?.errorMessage}
         getBadgeText={getDisplayValue.categories}
         setFieldValue={(model) => {
@@ -544,15 +697,14 @@ export default function RestaurantCreateForm(props) {
           isReadOnly={false}
           placeholder="Search Category"
           value={currentCategoriesDisplayValue}
-          options={categoryRecords
-            .filter((r) => !categoriesIdSet.has(getIDValue.categories?.(r)))
-            .map((r) => ({
-              id: getIDValue.categories?.(r),
-              label: getDisplayValue.categories?.(r),
-            }))}
+          options={categoriesRecords.map((r) => ({
+            id: getIDValue.categories?.(r),
+            label: getDisplayValue.categories?.(r),
+          }))}
+          isLoading={categoriesLoading}
           onSelect={({ id, label }) => {
             setCurrentCategoriesValue(
-              categoryRecords.find((r) =>
+              categoriesRecords.find((r) =>
                 Object.entries(JSON.parse(id)).every(
                   ([key, value]) => r[key] === value
                 )
@@ -566,6 +718,7 @@ export default function RestaurantCreateForm(props) {
           }}
           onChange={(e) => {
             let { value } = e.target;
+            fetchCategoriesRecords(value);
             if (errors.categories?.hasError) {
               runValidationTasks("categories", value);
             }
@@ -580,6 +733,86 @@ export default function RestaurantCreateForm(props) {
           ref={categoriesRef}
           labelHidden={true}
           {...getOverrideProps(overrides, "categories")}
+        ></Autocomplete>
+      </ArrayField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              name,
+              rating,
+              notes,
+              categories,
+              dishes: values,
+            };
+            const result = onChange(modelFields);
+            values = result?.dishes ?? values;
+          }
+          setDishes(values);
+          setCurrentDishesValue(undefined);
+          setCurrentDishesDisplayValue("");
+        }}
+        currentFieldValue={currentDishesValue}
+        label={"Dishes"}
+        items={dishes}
+        hasError={errors?.dishes?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("dishes", currentDishesValue)
+        }
+        errorMessage={errors?.dishes?.errorMessage}
+        getBadgeText={getDisplayValue.dishes}
+        setFieldValue={(model) => {
+          setCurrentDishesDisplayValue(
+            model ? getDisplayValue.dishes(model) : ""
+          );
+          setCurrentDishesValue(model);
+        }}
+        inputFieldRef={dishesRef}
+        defaultFieldValue={""}
+      >
+        <Autocomplete
+          label="Dishes"
+          isRequired={false}
+          isReadOnly={false}
+          placeholder="Search Dish"
+          value={currentDishesDisplayValue}
+          options={dishesRecords
+            .filter((r) => !dishesIdSet.has(getIDValue.dishes?.(r)))
+            .map((r) => ({
+              id: getIDValue.dishes?.(r),
+              label: getDisplayValue.dishes?.(r),
+            }))}
+          isLoading={dishesLoading}
+          onSelect={({ id, label }) => {
+            setCurrentDishesValue(
+              dishesRecords.find((r) =>
+                Object.entries(JSON.parse(id)).every(
+                  ([key, value]) => r[key] === value
+                )
+              )
+            );
+            setCurrentDishesDisplayValue(label);
+            runValidationTasks("dishes", label);
+          }}
+          onClear={() => {
+            setCurrentDishesDisplayValue("");
+          }}
+          onChange={(e) => {
+            let { value } = e.target;
+            fetchDishesRecords(value);
+            if (errors.dishes?.hasError) {
+              runValidationTasks("dishes", value);
+            }
+            setCurrentDishesDisplayValue(value);
+            setCurrentDishesValue(undefined);
+          }}
+          onBlur={() => runValidationTasks("dishes", currentDishesDisplayValue)}
+          errorMessage={errors.dishes?.errorMessage}
+          hasError={errors.dishes?.hasError}
+          ref={dishesRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "dishes")}
         ></Autocomplete>
       </ArrayField>
       <Flex
