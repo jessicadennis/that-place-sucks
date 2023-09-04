@@ -1,18 +1,17 @@
 import { AmplifyProvider } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.js";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { StrictMode } from "react";
 import App from "./App.tsx";
+import PlacesTable from "./components/PlacesTable.tsx";
 import ErrorPage from "./components/error-page.jsx";
-import Home from "./pages/Home.tsx";
-import PlaceForm from "./pages/PlaceForm.tsx";
-import ReactDOM from "react-dom/client";
-
-import "bootstrap/dist/js/bootstrap.bundle.js";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "@aws-amplify/ui-react/styles.css";
 import "./index.css";
 import ClearAll from "./pages/Clear.tsx";
+import PlaceForm from "./pages/PlaceForm.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +23,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <PlacesTable />,
       },
       {
         path: "add",
@@ -33,10 +32,6 @@ const router = createBrowserRouter([
       {
         path: "edit/:restaurantId",
         element: <PlaceForm />,
-      },
-      {
-        path: "login",
-        element: <Home />,
       },
       {
         path: "kill-all",

@@ -27,7 +27,7 @@ import {
   deleteDish,
   updateDish,
 } from "../graphql/mutations.ts";
-import UserInfo from "../utilities/user-info.ts";
+import userInfo from "../utilities/user-info.ts";
 import SpinnerOverlay from "./SpinnerOverlay.tsx";
 
 async function getDishes(restaurantId: string) {
@@ -77,9 +77,10 @@ async function deleteADish(input: { id: string }) {
   });
 }
 
-const userGroups = new UserInfo();
-const user = await userGroups.getUser();
-const canDelete = await userGroups.getIsAdmin();
+let user = { username: "" };
+let canDelete = false;
+userInfo.user.subscribe((info) => (user = info));
+userInfo.isAdminOrSuperUser.subscribe((result) => (canDelete = result));
 
 function DishesForm({
   restaurantId,
