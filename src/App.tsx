@@ -1,22 +1,14 @@
-import { Authenticator } from "@aws-amplify/ui-react";
 import { Outlet } from "react-router-dom";
 import NavBar from "./components/NavBar";
 
 function App() {
   return (
-    <Authenticator hideSignUp>
-      {({ signOut, user }) => (
-        <main>
-          <NavBar
-            signOut={signOut}
-            user={user}
-          />
-          <div className="container py-5">
-            <Outlet />
-          </div>
-        </main>
-      )}
-    </Authenticator>
+    <main>
+      <NavBar />
+      <div className="container py-5">
+        <Outlet />
+      </div>
+    </main>
   );
 }
 

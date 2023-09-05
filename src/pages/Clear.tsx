@@ -1,5 +1,5 @@
 import { GraphQLQuery } from "@aws-amplify/api";
-import { Amplify, API } from "aws-amplify";
+import { API } from "aws-amplify";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   DeleteCategoryMutation,
@@ -9,7 +9,6 @@ import {
   ListNotesQuery,
   ListRestaurantsQuery,
 } from "../API";
-import awsconfig from "../aws-exports";
 import {
   deleteCategory,
   deleteNotes,
@@ -116,7 +115,6 @@ async function deleteANote(id: string) {
 }
 
 export default function ClearAll() {
-  Amplify.configure(awsconfig);
   const queryClient = useQueryClient();
 
   const catQuery = useQuery("categories", getCategories) as any;

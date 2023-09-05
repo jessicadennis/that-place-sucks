@@ -1,7 +1,6 @@
-import { Amplify, API } from "aws-amplify";
+import { API } from "aws-amplify";
 import { GraphQLQuery } from "@aws-amplify/api";
 import { useState } from "react";
-import awsconfig from "../aws-exports";
 import { useMutation, useQueryClient } from "react-query";
 import { Category, CreateCategoryMutation } from "../API";
 import { createCategory } from "../graphql/mutations";
@@ -51,8 +50,6 @@ function CategoryForm({
   const handleShow = () => {
     setShow(true);
   };
-
-  Amplify.configure(awsconfig);
 
   const queryClient = useQueryClient();
 
