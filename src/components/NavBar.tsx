@@ -1,9 +1,16 @@
-import { WithAuthenticatorProps } from "@aws-amplify/ui-react";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 import { faHamburger, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
-export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
+export default function NavBar() {
+  const { route, user, signOut } = useAuthenticator((context) => [
+    context.route,
+    context.signOut,
+  ]);
+
+  const navigate = useNavigate();
+
   const pages = [
     {
       id: 0,
@@ -17,9 +24,14 @@ export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
     },
   ];
 
+  function logOut() {
+    signOut();
+    navigate("/");
+  }
+
   return (
     <nav
-      className="navbar fixed-top bg-dark-subtle"
+      className="navbar fixed-top main-navigation"
       data-bs-theme="dark">
       <div className="container">
         <NavLink
@@ -41,19 +53,35 @@ export default function NavBar({ signOut, user }: WithAuthenticatorProps) {
           className="collapse navbar-collapse"
           id="navMenu">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item pb-2 border-bottom">
+            <li className="nav-item pb-2 border-bottom border-secondary">
               <div className="d-flex align-items-center">
                 <FontAwesomeIcon icon={faUser} />
-                <span className="ms-2">
-                  {user?.attributes?.given_name ?? ""}{" "}
-                  {user?.attributes?.family_name ?? ""}
-                </span>
-                <button
-                  className="btn btn-sm btn-dark ms-3"
-                  type="button"
-                  onClick={signOut}>
-                  Log Out
-                </button>
+                {route !== "authenticated" ? (
+                  <NavLink
+                    className={({ isActive, isPending }) =>
+                      isActive
+                        ? "nav-link ms-3 active disabled"
+                        : isPending
+                        ? "pending"
+                        : "nav-link ms-3"
+                    }
+                    to={"/login"}>
+                    Log in
+                  </NavLink>
+                ) : (
+                  <>
+                    <span className="ms-2">
+                      {user?.attributes?.given_name ?? ""}{" "}
+                      {user?.attributes?.family_name ?? ""}
+                    </span>
+                    <button
+                      className="btn btn-sm btn-outline-light ms-3"
+                      type="button"
+                      onClick={logOut}>
+                      Log Out
+                    </button>
+                  </>
+                )}
               </div>
             </li>
             {pages.map((page) => (

@@ -1,9 +1,6 @@
 import { GraphQLQuery } from "@aws-amplify/api";
-import {
-  WithAuthenticatorProps,
-  withAuthenticator,
-} from "@aws-amplify/ui-react";
-import { API, Amplify } from "aws-amplify";
+import { useAuthenticator, withAuthenticator } from "@aws-amplify/ui-react";
+import { API } from "aws-amplify";
 import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,7 +10,6 @@ import {
   ListCategoriesQuery,
   UpdateRestaurantMutation,
 } from "../API";
-import awsconfig from "../aws-exports";
 import CategoryForm from "../components/CategoryForm.js";
 import { getRestaurantById } from "../graphql/custom-queries.js";
 import {
@@ -27,7 +23,6 @@ import { listCategories } from "../graphql/queries.js";
 import { restaurantCategoriesByRestaurantId } from "../graphql/queries.ts";
 import { Category, Dish, Notes } from "../models";
 import DishesForm from "../components/DishesForm.tsx";
-import userInfo from "../utilities/user-info.ts";
 import { Toast, ToastContainer } from "react-bootstrap";
 import { ToastPosition } from "react-bootstrap/esm/ToastContainer";
 
@@ -176,10 +171,8 @@ async function editRestaurant(input: RestauarntMutationInput) {
   await Promise.all(promises);
 }
 
-let canAddCategories = false;
-userInfo.isAdminOrSuperUser.subscribe((result) => (canAddCategories = result));
-
-function PlaceForm({ user }: WithAuthenticatorProps) {
+function PlaceForm() {
+  const { user } = useAuthenticator((context) => [context.route]);
   const [name, setName] = useState("");
   const [rating, setRating] = useState(1);
   const [note, setNote] = useState("");
@@ -192,8 +185,6 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastPosition] = useState("top-end" as ToastPosition);
 
-  Amplify.configure(awsconfig);
-
   const { restaurantId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -202,6 +193,12 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
 
   const catQuery = useQuery("categories", getCategories) as any;
   const categories = catQuery?.data?.listCategories?.items ?? [];
+
+  const userGroups =
+    user?.getSignInUserSession()?.getAccessToken()?.payload["cognito:groups"] ??
+    [];
+  const canAddCategories =
+    userGroups.includes("admin") || userGroups.includes("superuser");
 
   const addMutation = useMutation({
     mutationFn: () =>
@@ -500,4 +497,4 @@ function PlaceForm({ user }: WithAuthenticatorProps) {
   );
 }
 
-export default withAuthenticator(PlaceForm);
+export default PlaceForm;

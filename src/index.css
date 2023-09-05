@@ -52,9 +52,29 @@ table.table tbody tr td {
   top: 0;
 }
 
+.navbar.main-navigation {
+  background-color: #520dc2;
+}
+
+.navbar-toggler {
+  color: #ffffff;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.navbar-toggler:hover {
+  background-color: #3d0a91;
+  border-color: #ffffff;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+  border-color: #ffffff;
+}
+
 [data-amplify-authenticator] {
   align-items: center;
   display: flex;
-  height: 100vh;
+  /* height: 100vh; */
   justify-content: center;
 }

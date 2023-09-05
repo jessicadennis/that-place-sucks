@@ -16,7 +16,14 @@
         "thatplacesucks": {}
       },
       "api": {
-        "thatplacesucks": {}
+        "thatplacesucks": {},
+        "AdminQueries": {}
+      },
+      "function": {
+        "AdminQueries7d1bdbd4": {
+          "deploymentBucketName": "amplify-thatplacesucks-staging-163749-deployment",
+          "s3Key": "amplify-builds/AdminQueries7d1bdbd4-75416b3252756442536c-build.zip"
+        }
       }
     }
   }

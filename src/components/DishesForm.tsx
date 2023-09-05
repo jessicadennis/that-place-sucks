@@ -1,8 +1,8 @@
 import { GraphQLQuery } from "@aws-amplify/api";
-import { withAuthenticator } from "@aws-amplify/ui-react";
-import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { useAuthenticator, withAuthenticator } from "@aws-amplify/ui-react";
+import { faBowlFood, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { API, Amplify } from "aws-amplify";
+import { API } from "aws-amplify";
 import { useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
@@ -19,7 +19,6 @@ import {
   DishesByRestaurantIDQuery,
   UpdateDishMutation,
 } from "../API";
-import awsconfig from "../aws-exports.js";
 import { getDishesByRestaurant } from "../graphql/custom-queries.ts";
 import {
   createDish,
@@ -27,7 +26,6 @@ import {
   deleteDish,
   updateDish,
 } from "../graphql/mutations.ts";
-import userInfo from "../utilities/user-info.ts";
 import SpinnerOverlay from "./SpinnerOverlay.tsx";
 
 async function getDishes(restaurantId: string) {
@@ -77,11 +75,6 @@ async function deleteADish(input: { id: string }) {
   });
 }
 
-let user = { username: "" };
-let canDelete = false;
-userInfo.user.subscribe((info) => (user = info));
-userInfo.isAdminOrSuperUser.subscribe((result) => (canDelete = result));
-
 function DishesForm({
   restaurantId,
   restaurantName,
@@ -93,6 +86,7 @@ function DishesForm({
   restaurantRating: number;
   createCallback: (id: string) => void;
 }) {
+  const { user } = useAuthenticator((context) => [context.route]);
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [dupeError, setDupeError] = useState(false);
   const [name, setName] = useState("");
@@ -103,7 +97,11 @@ function DishesForm({
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastPosition] = useState("top-end" as ToastPosition);
 
-  Amplify.configure(awsconfig);
+  const userGroups =
+    user?.getSignInUserSession()?.getAccessToken()?.payload["cognito:groups"] ??
+    [];
+  const canDelete =
+    userGroups.includes("admin") || userGroups.includes("superuser");
 
   const form: HTMLFormElement = document.getElementById(
     "dish-form"
@@ -122,8 +120,6 @@ function DishesForm({
       nameField?.setCustomValidity("");
     }
   }
-
-  Amplify.configure(awsconfig);
 
   const queryClient = useQueryClient();
 
@@ -225,6 +221,10 @@ function DishesForm({
         disabled={!(restaurantID || (restaurantName && restaurantRating))}
         onClick={handleShow}>
         Manage dishes
+        <FontAwesomeIcon
+          className="ms-2"
+          icon={faBowlFood}
+        />
       </Button>
       <Modal
         show={show}

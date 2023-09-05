@@ -4,11 +4,9 @@ type Dish
     rules: [
       { allow: owner }
       { allow: groups, groups: ["superuser"] }
-      {
-        allow: groups
-        groups: ["user", "admin"]
-        operations: [create, read, update]
-      }
+      { allow: groups, groups: ["admin"], operations: [create, read, update] }
+      { allow: groups, groups: ["user"], operations: [create, read] }
+      { allow: public, operations: [read] }
     ]
   ) {
   id: ID!
@@ -23,11 +21,9 @@ type Notes
     rules: [
       { allow: owner }
       { allow: groups, groups: ["superuser"] }
-      {
-        allow: groups
-        groups: ["user", "admin"]
-        operations: [create, read, update]
-      }
+      { allow: groups, groups: ["admin"], operations: [create, read, update] }
+      { allow: groups, groups: ["user"], operations: [create, read] }
+      { allow: public, operations: [read] }
     ]
   ) {
   id: ID!
@@ -41,9 +37,9 @@ type Restaurant
   @model
   @auth(
     rules: [
-      { allow: public, operations: [read] }
       { allow: groups, groups: ["admin", "superuser"] }
       { allow: groups, groups: ["user"], operations: [create, read, update] }
+      { allow: public, operations: [read] }
     ]
   ) {
   id: ID!
@@ -59,8 +55,9 @@ type Category
   @auth(
     rules: [
       { allow: groups, groups: ["superuser"] }
-      { allow: groups, groups: ["admine"], operations: [create, read, update] }
+      { allow: groups, groups: ["admin"], operations: [create, read, update] }
       { allow: groups, groups: ["user"], operations: [read] }
+      { allow: public, operations: [read] }
     ]
   ) {
   id: ID!
